@@ -33,8 +33,8 @@ obj_name_div = $('<div id="permdialog_objname" class="section">Object Name: <spa
 //Make the div with the explanation about special permissions/advanced settings:
 advanced_expl_div = $('<div id="permdialog_advanced_explantion_text">For special permissions or advanced settings, click Advanced.</div>')
 
-// Make the (grouped) permission checkboxes table:
-grouped_permissions = define_grouped_permission_checkboxes('permdialog_grouped_permissions')
+// Make the (full) permission checkboxes table:
+grouped_permissions = define_permission_checkboxes('permdialog_grouped_permissions')
 grouped_permissions.addClass('section') // add a 'section' class to the grouped_permissions element. This class adds a bit of spacing between this element and the next.
 
 // Make the list of users (empty for now - will get populated when we know the file):
@@ -150,12 +150,19 @@ perm_dialog.append(file_permission_users)
 perm_dialog.append(perm_add_user_select)
 perm_add_user_select.append(perm_remove_user_button) // Cheating a bit again - add the remove button the the 'add user select' div, just so it shows up on the same line.
 perm_dialog.append(grouped_permissions)
-perm_dialog.append(advanced_expl_div)
+// perm_dialog.append(advanced_expl_div) // COMMENTING THIS OUT GETS RID OF INSTRUCTIONS TO OPEN ADVANCED SETTINGS!!!
+
+// Inline inheritance controls from Advanced Permissions tab
+const inheritanceControls = $('<div id="perm_inheritance_controls" class="section"></div>');
+inheritanceControls.append($('#adv_perm_inheritance_div'));
+inheritanceControls.append($('#adv_perm_replace_child_div'));
+perm_dialog.append(inheritanceControls);
 
 // --- Additional logic for reloading contents when needed: ---
 //Define an observer which will propagate perm_dialog's filepath attribute to all the relevant elements, whenever it changes:
 define_attribute_observer(perm_dialog, 'filepath', function(){
     let current_filepath = perm_dialog.attr('filepath')
+    $('#advdialog').attr('filepath', current_filepath)
 
     grouped_permissions.attr('filepath', current_filepath) // set filepath for permission checkboxes
     $('#permdialog_objname_namespan').text(current_filepath || 'Select a file or folder') // set filepath for Object Name text
@@ -266,7 +273,7 @@ function open_advanced_dialog(file_path) {
     $('#adv_owner_user_list').append(all_user_list)
 
     // open dialog:
-    $(`#advdialog`).dialog('open')
+    // $(`#advdialog`).dialog('open') // COMMENTING THIS OUT STOPS ADVANCED SETTINGS FROM OPENING!!!
 }
 
 // Update Effective User display
