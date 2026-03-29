@@ -3,13 +3,61 @@
     border-bottom: 1px solid #dddddd;
 }
 
+#sidepanel {
+    flex: 0 0 600px;
+    max-width: 600px;
+    width: 600px;
+    position: sticky;
+    top: 20px;
+    align-self: flex-start;
+    min-height: calc(100vh - 20px);
+}
+
+.persistent-permissions-panel {
+    border: 1px solid #c9c9c9;
+    background: #f8f8f8;
+    padding: 16px;
+    box-sizing: border-box;
+    min-height: calc(100vh - 20px);
+}
+
+.persistent-permissions-panel__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+#permdialog_title {
+    margin: 0 0 4px 0;
+    font-size: 20px;
+}
+
+#permdialog_subtitle {
+    color: #555555;
+    font-size: 14px;
+}
+
+#permdialog_objname {
+    word-break: break-word;
+}
+
+#permdialog_file_user_list {
+    background: #ffffff;
+}
+
+#permdialog_grouped_permissions {
+    background: #ffffff;
+}
+
 .section {
     margin-bottom: 5px;
 }
 
-.ui-selected { 
-    background: #007fff; 
-    color: white; 
+.ui-selected {
+    background: #007fff;
+    color: white;
 }
 
 .footer {
@@ -23,7 +71,7 @@
     position: absolute;
     width: 99%;
     bottom: 0px;
-    top:unset;
+    top: unset;
     left: 0;
     background-color: #eee;
     z-index: 100;
@@ -35,4 +83,22 @@
 
 .no-close .ui-dialog-titlebar-close {
     display: none;
+}
+
+@media (max-width: 980px) {
+    #html-loc {
+        flex-direction: column;
+    }
+
+    #sidepanel {
+        position: static;
+        width: 100%;
+        max-width: none;
+        flex-basis: auto;
+        min-height: auto;
+    }
+
+    .persistent-permissions-panel {
+        min-height: auto;
+    }
 }

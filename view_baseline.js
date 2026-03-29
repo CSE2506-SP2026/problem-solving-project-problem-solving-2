@@ -4,28 +4,27 @@ show_starter_dialogs = false // set this to "false" to disable the survey and 3-
 // ---- Set up main Permissions dialog ----
 
 // --- Create all the elements, and connect them as needed: ---
-// Make permissions dialog:
-perm_dialog = define_new_dialog('permdialog', title='Permissions', options = {
-    // The following are standard jquery-ui options. See https://jqueryui.com/dialog/
-    height: 500,
-    width: 400,
-    buttons: {
-        OK:{
-            text: "OK",
-            id: "perm-dialog-ok-button",
-            click: function() {
-                $( this ).dialog( "close" );
-            }
-        },
-        Advanced: {
-            text: "Advanced",
-            id: "perm-dialog-advanced-button",
-            click: function() {
-                open_advanced_dialog(perm_dialog.attr('filepath'))
-            }
-        }
+// Make permissions sidebar:
+perm_dialog = $(`
+    <div id="permdialog" class="persistent-permissions-panel" filepath="">
+        <div class="persistent-permissions-panel__header">
+            <div>
+                <h2 id="permdialog_title">Permissions</h2>
+                <div id="permdialog_subtitle">Select a file or folder to inspect its permissions.</div>
+            </div>
+            <button id="perm-dialog-advanced-button" class="ui-button ui-widget ui-corner-all">Advanced</button>
+        </div>
+    </div>
+`)
+$('#sidepanel').append(perm_dialog)
+
+$('#perm-dialog-advanced-button').click(function() {
+    let filepath = perm_dialog.attr('filepath')
+    if(filepath && filepath.length > 0) {
+        open_advanced_dialog(filepath)
     }
 })
+$('#perm-dialog-advanced-button').prop('disabled', true)
 
 // Make the initial "Object Name:" text:
 // If you pass in valid HTML to $(), it will *create* elements instead of selecting them. (You still have to append them, though)
@@ -34,8 +33,8 @@ obj_name_div = $('<div id="permdialog_objname" class="section">Object Name: <spa
 //Make the div with the explanation about special permissions/advanced settings:
 advanced_expl_div = $('<div id="permdialog_advanced_explantion_text">For special permissions or advanced settings, click Advanced.</div>')
 
-// Make the (grouped) permission checkboxes table:
-grouped_permissions = define_grouped_permission_checkboxes('permdialog_grouped_permissions')
+// Make the (full) permission checkboxes table:
+grouped_permissions = define_permission_checkboxes('permdialog_grouped_permissions')
 grouped_permissions.addClass('section') // add a 'section' class to the grouped_permissions element. This class adds a bit of spacing between this element and the next.
 
 // Make the list of users (empty for now - will get populated when we know the file):
@@ -151,23 +150,34 @@ perm_dialog.append(file_permission_users)
 perm_dialog.append(perm_add_user_select)
 perm_add_user_select.append(perm_remove_user_button) // Cheating a bit again - add the remove button the the 'add user select' div, just so it shows up on the same line.
 perm_dialog.append(grouped_permissions)
-perm_dialog.append(advanced_expl_div)
+// perm_dialog.append(advanced_expl_div) // COMMENTING THIS OUT GETS RID OF INSTRUCTIONS TO OPEN ADVANCED SETTINGS!!!
+
+// Inline inheritance controls from Advanced Permissions tab
+const inheritanceControls = $('<div id="perm_inheritance_controls" class="section"></div>');
+inheritanceControls.append($('#adv_perm_inheritance_div'));
+inheritanceControls.append($('#adv_perm_replace_child_div'));
+perm_dialog.append(inheritanceControls);
 
 // --- Additional logic for reloading contents when needed: ---
 //Define an observer which will propagate perm_dialog's filepath attribute to all the relevant elements, whenever it changes:
 define_attribute_observer(perm_dialog, 'filepath', function(){
     let current_filepath = perm_dialog.attr('filepath')
+    $('#advdialog').attr('filepath', current_filepath)
 
     grouped_permissions.attr('filepath', current_filepath) // set filepath for permission checkboxes
-    $('#permdialog_objname_namespan').text(current_filepath) // set filepath for Object Name text
+    $('#permdialog_objname_namespan').text(current_filepath || 'Select a file or folder') // set filepath for Object Name text
+    $('#permdialog_subtitle').text(current_filepath ? 'Permissions shown for the selected item.' : 'Select a file or folder to inspect its permissions.')
+    $('#perm-dialog-advanced-button').prop('disabled', !(current_filepath && current_filepath in path_to_file))
 
     // Generate element with all the file-specific users:
-    file_users = get_file_users(path_to_file[current_filepath])
-    file_user_list = make_user_list('permdialog_file_user', file_users, add_attributes = true)
-    grouped_permissions.attr('username', '') // since we are reloading the user list, reset the username in permission checkboxes
-    //replace previous user list with the one we just generated:
     file_permission_users.empty()
-    file_permission_users.append(file_user_list)
+    grouped_permissions.attr('username', '') // since we are reloading the user list, reset the username in permission checkboxes
+
+    if(current_filepath && current_filepath in path_to_file) {
+        file_users = get_file_users(path_to_file[current_filepath])
+        file_user_list = make_user_list('permdialog_file_user', file_users, add_attributes = true)
+        file_permission_users.append(file_user_list)
+    }
 })
 
 
@@ -263,7 +273,7 @@ function open_advanced_dialog(file_path) {
     $('#adv_owner_user_list').append(all_user_list)
 
     // open dialog:
-    $(`#advdialog`).dialog('open')
+    // $(`#advdialog`).dialog('open') // COMMENTING THIS OUT STOPS ADVANCED SETTINGS FROM OPENING!!!
 }
 
 // Update Effective User display

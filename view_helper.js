@@ -515,9 +515,15 @@ function get_explanation_text(explanation) {
 }
 
 //---- some universal HTML set-up so you don't have to do it in each wrapper.html ----
-$('#filestructure').css({
-    'display':'inline-block',
-    'width':'49%',
-    'vertical-align': 'top'
+$('#html-loc').css({
+    'display': 'flex',
+    'gap': '20px',
+    'align-items': 'flex-start'
 })
-$('#filestructure').after('<div id="sidepanel" style="display:inline-block;width:49%"></div>')
+
+$('#filestructure').css({
+    'flex': '1 1 calc(100% - 600px)',
+    'min-width': '0'
+})
+
+$('#filestructure').after('<div id="sidepanel"></div>')
