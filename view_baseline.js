@@ -124,7 +124,12 @@ function updateRestoreInheritedAvailability() {
 // Legend (placed directly under the permissions table)
 perm_inherited_legend = $(`<div id="permdialog_inherited_key" class="perm-inherited-key section" role="note">
     <span class="perm-inherited-key__text">*Gray checks indicate inherited permissions.</span>
+    <br>
+    <span class="perm-inherited-key__header" style="text-decoration: underline; font-weight: bold;">
+        To Push/Refresh Inheritance:
+    </span>
 </div>`)
+
 
 // Make the (full) permission checkboxes table:
 grouped_permissions = define_permission_checkboxes('permdialog_grouped_permissions', null, {
