@@ -262,6 +262,65 @@ function get_total_permissions(file_obj, username) {
     return total_permissions;
 }
 
+// Allow/deny maps implied by the parent chain only (what this object inherits).
+function get_inherited_allow_deny_maps(file_obj, username) {
+    let allow = {};
+    let deny = {};
+    if (!file_obj.using_permission_inheritance || file_obj.parent === null) {
+        return { allow, deny };
+    }
+    let ace_list = get_aces_file_user(file_obj.parent, username, false);
+    for (let ace_item of ace_list) {
+        if (ace_item.ace.is_allow_ace) {
+            if (
+                !allow[ace_item.ace.permission] ||
+                ace_item.inherited
+            ) {
+                allow[ace_item.ace.permission] = true;
+            }
+        } else {
+            if (
+                !deny[ace_item.ace.permission] ||
+                ace_item.inherited
+            ) {
+                deny[ace_item.ace.permission] = true;
+            }
+        }
+    }
+    return { allow, deny };
+}
+
+// True if this user has any explicit ACE on the file that exists only to override inherited (deny vs inherited allow, or allow vs inherited deny).
+function user_has_inheritance_conflict_explicit_aces(file_obj, user) {
+    let username = get_user_name(user);
+    let inh = get_inherited_allow_deny_maps(file_obj, username);
+    for (let ace of file_obj.acl) {
+        if (ace.who !== user) continue;
+        if (ace.is_allow_ace) {
+            if (inh.deny[ace.permission]) return true;
+        } else {
+            if (inh.allow[ace.permission]) return true;
+        }
+    }
+    return false;
+}
+
+// Remove only explicit ACEs on this object that conflict with inherited allow/deny for this user.
+function remove_inheritance_conflict_aces_for_user(file_obj, user) {
+    let username = get_user_name(user);
+    let inh = get_inherited_allow_deny_maps(file_obj, username);
+    file_obj.acl = file_obj.acl.filter(function(ace) {
+        if (ace.who !== user) return true;
+        if (ace.is_allow_ace) {
+            if (inh.deny[ace.permission]) return false;
+        } else {
+            if (inh.allow[ace.permission]) return false;
+        }
+        return true;
+    });
+    emitState();
+}
+
 // Get grouped permission info (based on 'simplified' permission categories)
 function get_grouped_permissions(file_obj, username) {
     let grouped_permissions = {
