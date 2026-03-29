@@ -51,6 +51,63 @@
     background: #ffffff;
 }
 
+/* Sidebar: inherited permission checkboxes appear visually subdued */
+.perm-inherited-backing {
+    opacity: 0.45;
+    accent-color: #9a9a9a;
+}
+
+/* Inherited value still present but overridden by an explicit entry on this object */
+.perm-inherited-override-faded.perm-inherited-backing {
+    opacity: 0.2;
+    accent-color: #c8c8c8;
+}
+
+/* Keep inherited styling when disabled (override only via opposite column) */
+.perm_checkbox.perm-inherited-backing:disabled {
+    opacity: 0.45;
+    cursor: default !important; /* override UA “not-allowed” on disabled controls */
+}
+
+.perm_checkbox.perm-inherited-backing.perm-inherited-override-faded:disabled {
+    opacity: 0.2;
+    cursor: default !important;
+}
+
+.perm-inherited-key {
+    font-size: 14px;
+    line-height: 1.4;
+    color: #333333;
+    margin-top: 4px;
+}
+
+/* Match Advanced permission-tab checkbox rows */
+#perm_inheritance_controls .perm-restore-inherited-div {
+    margin-top: 0;
+}
+
+#perm_inheritance_controls #adv_perm_replace_child_div {
+    margin-top: 6px;
+}
+
+#perm_inheritance_controls .perm-restore-inherited-div label,
+#perm_inheritance_controls #adv_perm_replace_child_permissions_label {
+    font-size: 14px;
+    font-weight: normal;
+    vertical-align: middle;
+}
+
+#perm_inheritance_controls .perm-restore-inherited-div input[type="checkbox"],
+#perm_inheritance_controls #adv_perm_replace_child_permissions {
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+#perm_inheritance_controls:has(#perm_restore_inherited_checkbox:disabled) #perm_restore_inherited_label {
+    color: #888888;
+    cursor: not-allowed;
+}
+
 .section {
     margin-bottom: 5px;
 }

@@ -33,14 +33,118 @@ obj_name_div = $('<div id="permdialog_objname" class="section">Object Name: <spa
 //Make the div with the explanation about special permissions/advanced settings:
 advanced_expl_div = $('<div id="permdialog_advanced_explantion_text">For special permissions or advanced settings, click Advanced.</div>')
 
+// Confirm before adding explicit ACEs that override inherited permissions (sidebar permissions table)
+inherited_override_dialog = define_new_dialog('inherited_override_confirm_dialog', 'Override inherited permission?', {
+    buttons: {
+        Yes: {
+            text: 'Yes',
+            id: 'inherited-override-yes-button',
+            click: function() {
+                let fn = inherited_override_dialog.data('permOverrideOnConfirm')
+                if(typeof fn === 'function') fn()
+                inherited_override_dialog.removeData('permOverrideOnConfirm')
+                inherited_override_dialog.removeData('permOverrideOnCancel')
+                inherited_override_dialog.dialog('close')
+            },
+        },
+        No: {
+            text: 'No',
+            id: 'inherited-override-no-button',
+            click: function() {
+                let fn = inherited_override_dialog.data('permOverrideOnCancel')
+                if(typeof fn === 'function') fn()
+                inherited_override_dialog.removeData('permOverrideOnConfirm')
+                inherited_override_dialog.removeData('permOverrideOnCancel')
+                inherited_override_dialog.dialog('close')
+            },
+        },
+    },
+})
+inherited_override_dialog.html('<p id="inherited_override_confirm_text"></p>')
+
+restore_inherited_confirm_dialog = define_new_dialog('restore_inherited_confirm_dialog', 'Remove inheritance overrides?', {
+    buttons: {
+        Yes: {
+            text: 'Yes',
+            id: 'restore-inherited-yes-button',
+            click: function() {
+                let fp = restore_inherited_confirm_dialog.data('restoreFp')
+                let un = restore_inherited_confirm_dialog.data('restoreUn')
+                if(fp && un && fp in path_to_file && un in all_users) {
+                    restore_inherited_confirm_dialog.data('restoreCompleted', true)
+                    remove_inheritance_conflict_aces_for_user(path_to_file[fp], all_users[un])
+                    let refresh = grouped_permissions.data('refreshPermTable')
+                    if(typeof refresh === 'function') refresh()
+                }
+                $('#perm_restore_inherited_checkbox').prop('checked', false)
+                restore_inherited_confirm_dialog.removeData('restoreFp')
+                restore_inherited_confirm_dialog.removeData('restoreUn')
+                restore_inherited_confirm_dialog.dialog('close')
+                updateRestoreInheritedAvailability()
+            },
+        },
+        No: {
+            text: 'No',
+            id: 'restore-inherited-no-button',
+            click: function() {
+                $('#perm_restore_inherited_checkbox').prop('checked', false)
+                restore_inherited_confirm_dialog.removeData('restoreFp')
+                restore_inherited_confirm_dialog.removeData('restoreUn')
+                restore_inherited_confirm_dialog.dialog('close')
+            },
+        },
+    },
+})
+restore_inherited_confirm_dialog.html('<p id="restore_inherited_confirm_text"></p>')
+restore_inherited_confirm_dialog.on('dialogclose', function() {
+    if(restore_inherited_confirm_dialog.data('restoreCompleted')) {
+        restore_inherited_confirm_dialog.removeData('restoreCompleted')
+        restore_inherited_confirm_dialog.removeData('restoreFp')
+        restore_inherited_confirm_dialog.removeData('restoreUn')
+        return
+    }
+    $('#perm_restore_inherited_checkbox').prop('checked', false)
+    restore_inherited_confirm_dialog.removeData('restoreFp')
+    restore_inherited_confirm_dialog.removeData('restoreUn')
+})
+
+function updateRestoreInheritedAvailability() {
+    let fp = perm_dialog.attr('filepath')
+    let un = grouped_permissions.attr('username')
+    let cb = $('#perm_restore_inherited_checkbox')
+    if(!cb.length) return
+    if(!fp || !un || !(fp in path_to_file) || !(un in all_users)) {
+        cb.prop('disabled', true)
+        return
+    }
+    let canRestore = user_has_inheritance_conflict_explicit_aces(path_to_file[fp], all_users[un])
+    cb.prop('disabled', !canRestore)
+}
+
+// Legend (placed directly under the permissions table)
+perm_inherited_legend = $(`<div id="permdialog_inherited_key" class="perm-inherited-key section" role="note">
+    <span class="perm-inherited-key__text">*Gray checks indicate inherited permissions.</span>
+</div>`)
+
 // Make the (full) permission checkboxes table:
-grouped_permissions = define_permission_checkboxes('permdialog_grouped_permissions')
+grouped_permissions = define_permission_checkboxes('permdialog_grouped_permissions', null, {
+    inheritedOverrideConfirm: function(message, onConfirm, onCancel) {
+        $('#inherited_override_confirm_text').text(message)
+        inherited_override_dialog.data('permOverrideOnConfirm', onConfirm)
+        inherited_override_dialog.data('permOverrideOnCancel', onCancel)
+        inherited_override_dialog.dialog('open')
+    },
+    onAfterInheritedOverride: function() {
+        updateRestoreInheritedAvailability()
+    },
+})
 grouped_permissions.addClass('section') // add a 'section' class to the grouped_permissions element. This class adds a bit of spacing between this element and the next.
 
 // Make the list of users (empty for now - will get populated when we know the file):
 file_permission_users = define_single_select_list('permdialog_file_user_list', function(selected_user, e, ui){
     // when a new user is selected, change username attribute of grouped permissions:
     grouped_permissions.attr('username', selected_user)
+    updateRestoreInheritedAvailability()
 })
 file_permission_users.css({
     'height':'80px',
@@ -103,6 +207,7 @@ let are_you_sure_dialog = define_new_dialog('are_you_sure_dialog', "Are you sure
 
                 // Finally, close this dialog:
                 $( this ).dialog( "close" );
+                updateRestoreInheritedAvailability()
 
             },
         },
@@ -150,11 +255,40 @@ perm_dialog.append(file_permission_users)
 perm_dialog.append(perm_add_user_select)
 perm_add_user_select.append(perm_remove_user_button) // Cheating a bit again - add the remove button the the 'add user select' div, just so it shows up on the same line.
 perm_dialog.append(grouped_permissions)
+perm_dialog.append(perm_inherited_legend)
+
+perm_restore_inherited_div = $(`<div id="perm_restore_inherited_div" class="perm-restore-inherited-div">
+    <input type="checkbox" id="perm_restore_inherited_checkbox" name="restore_inherited" />
+    <label for="perm_restore_inherited_checkbox" id="perm_restore_inherited_label">Restore inherited permissions</label>
+</div>`)
+
+perm_restore_inherited_div.find('#perm_restore_inherited_checkbox').on('change', function() {
+    if(!$(this).prop('checked')) return
+    let fp = perm_dialog.attr('filepath')
+    let un = grouped_permissions.attr('username')
+    if(!fp || !un || !(fp in path_to_file) || !(un in all_users)) {
+        $(this).prop('checked', false)
+        return
+    }
+    if(!user_has_inheritance_conflict_explicit_aces(path_to_file[fp], all_users[un])) {
+        $(this).prop('checked', false)
+        return
+    }
+    $('#restore_inherited_confirm_text').text(
+        'Remove explicit Allow/Deny entries on this object that conflict with inherited permissions for "' + un + '"?'
+    )
+    restore_inherited_confirm_dialog.data('restoreFp', fp)
+    restore_inherited_confirm_dialog.data('restoreUn', un)
+    restore_inherited_confirm_dialog.dialog('open')
+})
+
+define_attribute_observer(grouped_permissions, 'username', updateRestoreInheritedAvailability)
+updateRestoreInheritedAvailability()
 // perm_dialog.append(advanced_expl_div) // COMMENTING THIS OUT GETS RID OF INSTRUCTIONS TO OPEN ADVANCED SETTINGS!!!
 
-// Inline inheritance controls from Advanced Permissions tab
+// Sidebar: restore control (replaces the Advanced "include inheritable permissions" row here only; that checkbox stays in Advanced dialog)
 const inheritanceControls = $('<div id="perm_inheritance_controls" class="section"></div>');
-inheritanceControls.append($('#adv_perm_inheritance_div'));
+inheritanceControls.append(perm_restore_inherited_div);
 inheritanceControls.append($('#adv_perm_replace_child_div'));
 perm_dialog.append(inheritanceControls);
 
@@ -178,6 +312,7 @@ define_attribute_observer(perm_dialog, 'filepath', function(){
         file_user_list = make_user_list('permdialog_file_user', file_users, add_attributes = true)
         file_permission_users.append(file_user_list)
     }
+    updateRestoreInheritedAvailability()
 })
 
 
