@@ -12,7 +12,6 @@ perm_dialog = $(`
                 <h2 id="permdialog_title">Permissions</h2>
                 <div id="permdialog_subtitle">Select a file or folder to inspect its permissions.</div>
             </div>
-            <button id="perm-dialog-advanced-button" class="ui-button ui-widget ui-corner-all">Advanced</button>
         </div>
     </div>
 `)
@@ -301,11 +300,11 @@ perm_restore_inherited_div.find('#perm_restore_inherited_checkbox').on('change',
 
 define_attribute_observer(grouped_permissions, 'username', updateRestoreInheritedAvailability)
 updateRestoreInheritedAvailability()
-// perm_dialog.append(advanced_expl_div) // COMMENTING THIS OUT GETS RID OF INSTRUCTIONS TO OPEN ADVANCED SETTINGS!!!
 
 // Sidebar: restore control (replaces the Advanced "include inheritable permissions" row here only; that checkbox stays in Advanced dialog)
 const inheritanceControls = $('<div id="perm_inheritance_controls" class="section"></div>');
 inheritanceControls.append(perm_restore_inherited_div);
+inheritanceControls.append($('#adv_perm_inheritance_div'));
 inheritanceControls.append($('#adv_perm_replace_child_div'));
 perm_dialog.append(inheritanceControls);
 
