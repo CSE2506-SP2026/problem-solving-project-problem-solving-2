@@ -42,7 +42,6 @@ obj_name_div = $(`
 //Make the div with the explanation about special permissions/advanced settings:
 advanced_expl_div = $('<div id="permdialog_advanced_explantion_text">For special permissions or advanced settings, click Advanced.</div>')
 
-// Confirm before adding explicit ACEs that override inherited permissions (sidebar permissions table)
 inherited_override_dialog = define_new_dialog('inherited_override_confirm_dialog', 'Override inherited permission?', {
     buttons: {
         Yes: {
@@ -130,7 +129,7 @@ function updateRestoreInheritedAvailability() {
     cb.prop('disabled', !canRestore)
 }
 
-// Legend (placed directly under the permissions table)
+// Gray check key
 perm_inherited_legend = $(`<div id="permdialog_inherited_key" class="perm-inherited-key section" role="note">
     <span class="perm-inherited-key__text">*Gray checks indicate inherited permissions.</span>
     <br>

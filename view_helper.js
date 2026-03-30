@@ -404,14 +404,12 @@ function define_permission_checkboxes(id_prefix, which_permissions = null, hooks
                     }
                 }
             }
-            // Inherited values are not directly clickable; override only via the opposite Allow/Deny column.
             perm_table.find('.perm_checkbox').each(function(){
                 let $cb = $(this)
                 $cb.prop('disabled', $cb.hasClass('perm-inherited-backing'))
             })
         }
         else {
-            // can't get permissions for this username/filepath - reset everything into a blank state
             perm_table.find('.perm_checkbox').prop('disabled', true)
             perm_table.find('.perm_checkbox').prop('checked', false)
             perm_table.find('.perm_checkbox').removeClass('perm-inherited-backing perm-inherited-override-faded')
