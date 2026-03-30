@@ -262,7 +262,7 @@ function get_total_permissions(file_obj, username) {
     return total_permissions;
 }
 
-// Allow/deny maps implied by the parent chain only (what this object inherits).
+// Object inheritance.
 function get_inherited_allow_deny_maps(file_obj, username) {
     let allow = {};
     let deny = {};
@@ -290,7 +290,7 @@ function get_inherited_allow_deny_maps(file_obj, username) {
     return { allow, deny };
 }
 
-// True if this user has any explicit ACE on the file that exists only to override inherited (deny vs inherited allow, or allow vs inherited deny).
+// Recognizes inheritance conflicts.
 function user_has_inheritance_conflict_explicit_aces(file_obj, user) {
     let username = get_user_name(user);
     let inh = get_inherited_allow_deny_maps(file_obj, username);
@@ -305,7 +305,7 @@ function user_has_inheritance_conflict_explicit_aces(file_obj, user) {
     return false;
 }
 
-// Remove only explicit ACEs on this object that conflict with inherited allow/deny for this user.
+// Manages inheritance conflicts.
 function remove_inheritance_conflict_aces_for_user(file_obj, user) {
     let username = get_user_name(user);
     let inh = get_inherited_allow_deny_maps(file_obj, username);
