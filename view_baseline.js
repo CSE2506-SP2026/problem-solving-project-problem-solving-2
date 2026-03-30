@@ -31,10 +31,12 @@ $('#perm-dialog-advanced-button').prop('disabled', true)
 obj_name_div = $(`
 <div id="permdialog_objname" class="section">
     Object Name: 
-    <span class="info-icon">?</span> 
-    <span class="custom-tooltip-text"> 
-        The file or folder whose permissions are being viewed and modified.
-    </span> 
+    <span class="tooltip-wrapper">
+        <span class="info-icon">?</span> 
+        <span class="custom-tooltip-text"> 
+            The file or folder whose permissions are being viewed and modified.
+        </span> 
+    </span>
     <span id="permdialog_objname_namespan"></span> 
 </div>
 `)
@@ -275,8 +277,11 @@ perm_restore_inherited_div = $(`
     <div id="perm_restore_inherited_div" class="perm-restore-inherited-div">
     <input type="checkbox" id="perm_restore_inherited_checkbox" name="restore_inherited" />
     <label for="perm_restore_inherited_checkbox" id="perm_restore_inherited_label">Restore inherited permissions</label>
-    <span class ="info-icon" id="restore_info_icon">?</span>
-    <span class="custom-tooltip-text">Removes custom permissions and reapplies inherited permissions from the parent folder. </span>
+    <span class="tooltip-wrapper">
+        <span class ="info-icon" id="restore_info_icon">?</span>
+        <span class="custom-tooltip-text">Removes custom permissions and reapplies inherited permissions from the parent folder. 
+        </span>
+    </span>
 </div>`)
 
 perm_restore_inherited_div.find('#perm_restore_inherited_checkbox').on('change', function() {

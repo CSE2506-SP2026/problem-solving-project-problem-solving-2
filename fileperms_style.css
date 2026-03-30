@@ -183,16 +183,15 @@
     background-color: #bdbdbd;
 }
 
-.perm-restore-inherited-div{
+/* .perm-restore-inherited-div{
     position: relative;
-}
+} */
 
 .custom-tooltip-text{
     visibility: hidden;
     opacity: 0;
     position: absolute;
-    /*left: 220px;*/
-    /left: calc(100% + 10px);   /* 👈 unified positioning */
+    left: calc(100% + 10px);
     top: 50%;
     transform: translateY(-50%);
     background: #1c1c1c;
@@ -206,7 +205,6 @@
     z-index: 9999;
     transition: opacity 0.1s ease;
     pointer-events: none;
-    margin-left: 4px;
 }
 
 .info-icon:hover + .custom-tooltip-text{
@@ -218,9 +216,7 @@ th {
     position: relative;
 }
 
-/*FIX BELOW*/
-
-#permdialog_objname{
+/* #permdialog_objname{
     position: relative;
 }
 
@@ -230,7 +226,11 @@ th {
 
 #perm_restore_inherited_div .custom-tooltip-text{
     left: 220px;
-}
+} */
+
+/* .custom-tooltip-text{
+    left: calc(100% + 10px);  
+} */
 
 .tooltip-wrapper{
     position: relative;
@@ -239,9 +239,10 @@ th {
     margin-left: 6px;
 }
 
-.tooltip-wrapper .custom-tooltip-text{
-    left: calc(100% + 10px);
+th[id$="_header_allow"] .custom-tooltip-text,
+th[id$="_header_deny"] .custom-tooltip-text{
+    right: calc(100% + 10px);
+    left: auto;
     top: 50%;
     transform: translateY(-50%);
 }
-
