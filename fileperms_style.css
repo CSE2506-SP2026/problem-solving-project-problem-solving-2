@@ -164,7 +164,6 @@
     opacity: 0;
     position: absolute;
     /*left: 220px;*/
-    /left: calc(100% + 10px);   /* 👈 unified positioning */
     top: 50%;
     transform: translateY(-50%);
     background: #1c1c1c;
