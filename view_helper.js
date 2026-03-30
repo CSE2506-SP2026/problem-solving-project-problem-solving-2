@@ -213,8 +213,18 @@ function define_grouped_permission_checkboxes(id_prefix, which_groups = null) {
         <tr id="${id_prefix}_header">
             <th id="${id_prefix}_header_p" width="99%">Permissions for <span id="${id_prefix}_header_username"></span>
             </th>
-            <th id="${id_prefix}_header_allow">Allow</th>
-            <th id="${id_prefix}_header_deny">Deny</th>
+            <th id="${id_prefix}_header_allow">Allow
+                <span class="info-icon">?</span>
+                <span class="custom-tooltip-text">
+                    Grants the selected permission to the user.
+                </span>
+            </th>
+            <th id="${id_prefix}_header_deny">Deny
+                <span class="info-icon">?</span>
+                <span class="custom-tooltip-text">
+                    Deny overrides Allow. Use this to explicitly block access.
+                </span>
+            </th>
         </tr>
     </table>
     `)
@@ -300,8 +310,20 @@ function define_permission_checkboxes(id_prefix, which_permissions = null, hooks
         <tr id="${id_prefix}_header">
             <th id="${id_prefix}_header_p" width="99%">Permissions for <span id="${id_prefix}_header_username"></span>
             </th>
-            <th id="${id_prefix}_header_allow">Allow</th>
-            <th id="${id_prefix}_header_deny">Deny</th>
+            <th id="${id_prefix}_header_allow">Allow
+                <span class="info-icon">?</span>
+                <span class="custom-tooltip-text">
+                    Grants the selected permission to the user.
+                </span>
+            
+            </th>
+            <th id="${id_prefix}_header_deny">Deny
+                <span class="info-icon">?</span>
+                <span class="custom-tooltip-text">
+                    Deny overrides Allow. Use this to explicitly block access.
+                </span>
+            
+            </th>
         </tr>
     </table>
     `)

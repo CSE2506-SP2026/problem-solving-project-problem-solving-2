@@ -28,7 +28,16 @@ $('#perm-dialog-advanced-button').prop('disabled', true)
 
 // Make the initial "Object Name:" text:
 // If you pass in valid HTML to $(), it will *create* elements instead of selecting them. (You still have to append them, though)
-obj_name_div = $('<div id="permdialog_objname" class="section">Object Name: <span id="permdialog_objname_namespan"></span> </div>')
+obj_name_div = $(`
+<div id="permdialog_objname" class="section">
+    Object Name: 
+    <span class="info-icon">?</span> 
+    <span class="custom-tooltip-text"> 
+        The file or folder whose permissions are being viewed and modified.
+    </span> 
+    <span id="permdialog_objname_namespan"></span> 
+</div>
+`)
 
 //Make the div with the explanation about special permissions/advanced settings:
 advanced_expl_div = $('<div id="permdialog_advanced_explantion_text">For special permissions or advanced settings, click Advanced.</div>')
@@ -262,9 +271,12 @@ perm_add_user_select.append(perm_remove_user_button) // Cheating a bit again - a
 perm_dialog.append(grouped_permissions)
 perm_dialog.append(perm_inherited_legend)
 
-perm_restore_inherited_div = $(`<div id="perm_restore_inherited_div" class="perm-restore-inherited-div">
+perm_restore_inherited_div = $(`
+    <div id="perm_restore_inherited_div" class="perm-restore-inherited-div">
     <input type="checkbox" id="perm_restore_inherited_checkbox" name="restore_inherited" />
     <label for="perm_restore_inherited_checkbox" id="perm_restore_inherited_label">Restore inherited permissions</label>
+    <span class ="info-icon" id="restore_info_icon">?</span>
+    <span class="custom-tooltip-text">Removes custom permissions and reapplies inherited permissions from the parent folder. </span>
 </div>`)
 
 perm_restore_inherited_div.find('#perm_restore_inherited_checkbox').on('change', function() {

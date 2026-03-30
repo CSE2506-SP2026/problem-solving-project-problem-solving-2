@@ -15,6 +15,12 @@ function make_file_element(file_obj) {
                 <button class="ui-button ui-widget ui-corner-all permbutton" path="${file_hash}" id="${file_hash}_permbutton"> 
                     <span class="fa fa-share-alt" id="${file_hash}_permicon"></span> 
                 </button>
+                <span class="tooltip-wrapper">
+                    <span class="info-icon">?</span>
+                    <span class="custom-tooltip-text">
+                        Opens the permissions panel for this file or folder
+                    </span>
+                </span>
             </h3>
         </div>`)
 
@@ -35,7 +41,13 @@ function make_file_element(file_obj) {
             <button class="ui-button ui-widget ui-corner-all permbutton" path="${file_hash}" id="${file_hash}_permbutton"> 
                 <span class="fa fa-share-alt" id="${file_hash}_permicon"></span> 
             </button>
-        </div>`)
+            <span class="tooltip-wrapper">
+            <span class="info-icon">?</span>
+            <span class="custom-tooltip-text">
+                Opens the permissions panel for this file or folder
+            </span>
+        </span>
+    </div>`)
     }
 }
 

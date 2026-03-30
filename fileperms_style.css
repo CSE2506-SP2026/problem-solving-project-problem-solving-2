@@ -84,6 +84,9 @@
 /* Match Advanced permission-tab checkbox rows */
 #perm_inheritance_controls .perm-restore-inherited-div {
     margin-top: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 #perm_inheritance_controls #adv_perm_replace_child_div {
@@ -159,3 +162,86 @@
         min-height: auto;
     }
 }
+
+.info-icon{
+    display: inline-flex;
+    align-items:center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    margin-left: 4px;
+    border-radius: 50%;
+    background-color: #cfcfcf;
+    color: #333333;
+    font-weight: bold;
+    font-size: 11px;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.info-icon:hover{
+    background-color: #bdbdbd;
+}
+
+.perm-restore-inherited-div{
+    position: relative;
+}
+
+.custom-tooltip-text{
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    /*left: 220px;*/
+    /left: calc(100% + 10px);   /* 👈 unified positioning */
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1c1c1c;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.3;
+    white-space: normal;
+    width: 240px;
+    z-index: 9999;
+    transition: opacity 0.1s ease;
+    pointer-events: none;
+    margin-left: 4px;
+}
+
+.info-icon:hover + .custom-tooltip-text{
+    visibility: visible;
+    opacity: 1;
+
+}
+th {
+    position: relative;
+}
+
+/*FIX BELOW*/
+
+#permdialog_objname{
+    position: relative;
+}
+
+#permdialog_objname .custom-tooltip-text{
+    left: 120px;
+}
+
+#perm_restore_inherited_div .custom-tooltip-text{
+    left: 220px;
+}
+
+.tooltip-wrapper{
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 6px;
+}
+
+.tooltip-wrapper .custom-tooltip-text{
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
