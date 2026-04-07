@@ -117,6 +117,33 @@ restore_inherited_confirm_dialog.on('dialogclose', function() {
     restore_inherited_confirm_dialog.removeData('restoreUn')
 })
 
+startup_instruction_dialog = define_new_dialog('startup_instruction_dialog', 'How to use this interface', {
+    width: 560,
+    buttons: {
+        OK: {
+            text: 'OK',
+            id: 'startup-instruction-ok-button',
+            click: function() {
+                $( this ).dialog('close')
+            },
+        },
+    },
+})
+startup_instruction_dialog.html(`
+<div id="startup_instruction_text">
+    <p>To change a user’s permissions for a file or folder, follow these steps:</p>
+    <ol>
+        <li>Select the file or folder whose permissions you want to change.</li>
+        <li>Select the user whose access you want to update.</li>
+        <li>If the user or group is not listed, add them first.</li>
+        <li>Find the specific permission you want to change</li>
+        <li>Choose whether to <strong>Allow</strong> or <strong>Deny</strong> that permission for the selected user.</li>
+        <li>Repeat for any other permissions you want to change.</li>
+    </ol>
+    <p>If you are not sure what a permission means, hover over the <strong>?</strong> icon next to it to see an explanation.</p>
+</div>
+`)
+
 function updateRestoreInheritedAvailability() {
     let fp = perm_dialog.attr('filepath')
     let un = grouped_permissions.attr('username')
@@ -311,6 +338,25 @@ inheritanceControls.append(perm_restore_inherited_div);
 inheritanceControls.append($('#adv_perm_inheritance_div'));
 inheritanceControls.append($('#adv_perm_replace_child_div'));
 perm_dialog.append(inheritanceControls);
+
+function maybeOpenStartupInstructionDialog() {
+    if(startup_instruction_dialog.data('shownOnce')) return
+
+    let urlTag = new URLSearchParams(window.location.search).get('tag')
+    let scenarioTag = $('#scenario_context').data('tag')
+    if(urlTag || scenarioTag) {
+        startup_instruction_dialog.data('shownOnce', true)
+        startup_instruction_dialog.dialog('open')
+    }
+}
+
+$(function() {
+    maybeOpenStartupInstructionDialog()
+})
+
+window.addEventListener('load', function() {
+    maybeOpenStartupInstructionDialog()
+})
 
 // --- Additional logic for reloading contents when needed: ---
 //Define an observer which will propagate perm_dialog's filepath attribute to all the relevant elements, whenever it changes:
