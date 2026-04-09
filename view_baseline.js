@@ -191,8 +191,17 @@ file_permission_users.css({
     'height':'80px',
 })
 
+function showStatus(message) {
+    const el = $('#perm_action_status')
+    if(!el.length) return
+    el.text(message).addClass('permdialog-status--active')
+    setTimeout(() => {
+        el.text('').removeClass('permdialog-status--active')
+    }, 1200)
+}
+
 // Make button to add a new user to the list:
-perm_add_user_select = define_new_user_select_field('perm_add_user', 'Add...', on_user_change = function(selected_user){
+perm_add_user_select = define_new_user_select_field('perm_add_user', 'Add User', on_user_change = function(selected_user){
     // console.log("add...")
     let filepath = perm_dialog.attr('filepath')
     if(selected_user && (selected_user.length > 0) && (selected_user in all_users)) { // sanity check that a user is actually selected (and exists)
@@ -200,11 +209,11 @@ perm_add_user_select = define_new_user_select_field('perm_add_user', 'Add...', o
         if( file_permission_users.find(`#${expected_user_elem_id}`).length === 0 ) { // if such a user element doesn't already exist
             new_user_elem = make_user_elem('permdialog_file_user', selected_user)
             file_permission_users.append(new_user_elem)
+            showStatus(`Added ${selected_user}`)
         }
     }    
 })
 perm_add_user_select.find('span').hide()// Cheating a bit - just show the button from the user select; hide the part that displays the username.
-
 
 // -- Make button to remove currently-selected user; also make some dialogs that may pop up when user clicks this. --
 
@@ -250,6 +259,8 @@ let are_you_sure_dialog = define_new_dialog('are_you_sure_dialog', "Are you sure
                 $( this ).dialog( "close" );
                 updateRestoreInheritedAvailability()
 
+                showStatus(`Removed ${username}`)
+
             },
         },
         No: {
@@ -265,7 +276,7 @@ let are_you_sure_dialog = define_new_dialog('are_you_sure_dialog', "Are you sure
 are_you_sure_dialog.text('Do you want to remove permissions for this user?')
 
 // Make actual "remove" button:
-perm_remove_user_button  = $('<button id="perm_remove_user" class="ui-button ui-widget ui-corner-all">Remove</button>')
+perm_remove_user_button  = $('<button id="perm_remove_user" class="ui-button ui-widget ui-corner-all">Remove Selected User</button>')
 perm_remove_user_button.click(function(){
     // Get the current user and filename we are working with:
     let selected_username = file_permission_users.attr('selected_item')
@@ -291,10 +302,12 @@ perm_remove_user_button.click(function(){
 
 // --- Append all the elements to the permissions dialog in the right order: --- 
 perm_dialog.append(obj_name_div)
-perm_dialog.append($('<div id="permissions_user_title">Group or user names:</div>'))
+perm_dialog.append($('<div id="permissions_user_title">Select user from below:</div>'))
 perm_dialog.append(file_permission_users)
 perm_dialog.append(perm_add_user_select)
 perm_add_user_select.append(perm_remove_user_button) // Cheating a bit again - add the remove button the the 'add user select' div, just so it shows up on the same line.
+const perm_action_status = $('<span id="perm_action_status" class="perm-action-status" aria-live="polite"></span>');
+perm_add_user_select.append(perm_action_status);
 perm_dialog.append(grouped_permissions)
 perm_dialog.append(perm_inherited_legend)
 
