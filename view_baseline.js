@@ -12,6 +12,10 @@ perm_dialog = $(`
                 <h2 id="permdialog_title">Permissions</h2>
                 <div id="permdialog_subtitle">Select a file or folder to inspect its permissions.</div>
             </div>
+            <div class="undo-redo-controls">
+                <button id="perm_undo_button" type="button">Undo</button>
+                <button id="perm_redo_button" type="button">Redo</button>
+            </div>
         </div>
     </div>
 `)

@@ -29,6 +29,29 @@
     margin-bottom: 12px;
 }
 
+.undo-redo-controls{
+    display: flex;
+    gap: 8px;
+}
+
+.undo-redo-controls button{
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 8px;
+    background: #027FFF;
+    color: white;
+    border: 1px solid #ccc;
+    cursor: pointer;
+
+    box-shadow: 0 4px 0 #027FFF;
+    transition: all 0.1s ease;
+}
+
+.undo-redo-controls button:active{
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #027FFF;
+}
+
 #permdialog_title {
     margin: 0 0 4px 0;
     font-size: 20px;
@@ -134,6 +157,8 @@
         min-height: auto;
     }
 }
+
+
 
 .info-icon{
     display: inline-flex;
