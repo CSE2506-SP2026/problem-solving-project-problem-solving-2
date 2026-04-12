@@ -22,6 +22,24 @@ permissions = {
   TAKE_OWNERSHIP: 'take ownership',
 }
 
+const permissionTooltips = {
+  EXECUTE: 'Allows entering folders or running executable files.',
+  LIST: 'View files and folders inside a directory.',
+  READ_ATTR: 'View basic file properties like size and timestamps.',
+  READ_EXTENDED_ATTR: 'Access additional metadata.',
+  WRITE_DATA: 'Create or modify file contents.',
+  APPEND_DATA: 'Add data or create subfolders.',
+  WRITE_ATTR: 'Modify file properties.',
+  WRITE_EXTENDED_ATTR: 'Edit extended metadata.',
+  DELETE_SUB: 'Delete files and subfolders inside a directory.',
+  DELETE: '⚠️ Permanently deletes the file or folder.',
+  READ_PERMS: 'View who has access and what permissions they have.',
+  CHANGE_PERMS: 'Modify access permissions.',
+  TAKE_OWNERSHIP: 'Take ownership of the file or folder.'
+}
+
+
+
 permission_ids = {}
 id_to_permission = {}
 let cur_p_id = 0

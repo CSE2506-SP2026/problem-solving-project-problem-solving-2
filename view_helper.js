@@ -213,13 +213,13 @@ function define_grouped_permission_checkboxes(id_prefix, which_groups = null) {
         <tr id="${id_prefix}_header">
             <th id="${id_prefix}_header_p" width="99%">Permissions for <span id="${id_prefix}_header_username"></span>
             </th>
-            <th id="${id_prefix}_header_allow">Allow
+            <th id="${id_prefix}_header_allow"><span class="permission-action-label permission-action-label--allow"><span class="permission-action-label__icon">✓</span><span>Allow</span></span>
                 <span class="info-icon">?</span>
                 <span class="custom-tooltip-text">
                     Grants the selected permission to the user.
                 </span>
             </th>
-            <th id="${id_prefix}_header_deny">Deny
+            <th id="${id_prefix}_header_deny"><span class="permission-action-label permission-action-label--deny"><span class="permission-action-label__icon">✕</span><span>Deny</span></span>
                 <span class="info-icon">?</span>
                 <span class="custom-tooltip-text">
                     Deny overrides Allow. Use this to explicitly block access.
@@ -310,14 +310,14 @@ function define_permission_checkboxes(id_prefix, which_permissions = null, hooks
         <tr id="${id_prefix}_header">
             <th id="${id_prefix}_header_p" width="99%">Permissions for <span id="${id_prefix}_header_username"></span>
             </th>
-            <th id="${id_prefix}_header_allow">Allow
+            <th id="${id_prefix}_header_allow"><span class="permission-action-label permission-action-label--allow"><span class="permission-action-label__icon">✓</span><span>Allow</span></span>
                 <span class="info-icon">?</span>
                 <span class="custom-tooltip-text">
                     Grants the selected permission to the user.
                 </span>
             
             </th>
-            <th id="${id_prefix}_header_deny">Deny
+            <th id="${id_prefix}_header_deny"><span class="permission-action-label permission-action-label--deny"><span class="permission-action-label__icon">✕</span><span>Deny</span></span>
                 <span class="info-icon">?</span>
                 <span class="custom-tooltip-text">
                     Deny overrides Allow. Use this to explicitly block access.
@@ -335,15 +335,28 @@ function define_permission_checkboxes(id_prefix, which_permissions = null, hooks
     // For each type of permission, create a row:
     for(let p of which_permissions){
         let p_id = p.replace(/[ \/]/g, '_') 
+        // For each type of permission, create a row:
+        let tooltip = permissionTooltips[Object.keys(permissions).find(k => permissions[k] === p)] || ''
+            
         let row = $(`<tr id="${id_prefix}_row_${p_id}">
-            <td id="${id_prefix}_${p_id}_name">${p}</td>
-        </tr>`)
+            <td id="${id_prefix}_${p_id}_name">
+            ${p}
+            <span class="tooltip-wrapper">
+                <span class="info-icon">?</span>
+                <span class="custom-tooltip-text">
+                    ${tooltip}
+                </span>
+            </span>
+        </td>
+    `)
+
         // Add allow and deny checkboxes:
         for(let ace_type of ['allow', 'deny']) {
             row.append(`<td id="${id_prefix}_${p_id}_${ace_type}_cell">
                 <input type="checkbox" id="${id_prefix}_${p_id}_${ace_type}_checkbox" ptype="${ace_type}" class="perm_checkbox" permission="${p}" ></input>
             </td>`)
         }
+        row.append(`</tr>`)
         perm_table.append(row)
     }
 
