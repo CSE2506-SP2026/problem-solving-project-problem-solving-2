@@ -406,30 +406,50 @@ window.addEventListener('load', function() {
 
 // --- Additional logic for reloading contents when needed: ---
 //Define an observer which will propagate perm_dialog's filepath attribute to all the relevant elements, whenever it changes:
+// --- Additional logic for reloading contents when needed: ---
+//Define an observer which will propagate perm_dialog's filepath attribute to all the relevant elements, whenever it changes:
 define_attribute_observer(perm_dialog, 'filepath', function(){
     let current_filepath = perm_dialog.attr('filepath')
     $('#advdialog').attr('filepath', current_filepath)
 
-    grouped_permissions.attr('filepath', current_filepath) // set filepath for permission checkboxes
+    grouped_permissions.attr('filepath', current_filepath)
     $('#permdialog_objname_namespan')
         .text(current_filepath || '')
         .toggleClass('permdialog_objname_namespan--empty', !current_filepath)
-    $('#permdialog_subtitle').text(current_filepath ? 'Permissions shown for the selected item.' : 'Select a file or folder to inspect its permissions.')
-    $('#perm-dialog-advanced-button').prop('disabled', !(current_filepath && current_filepath in path_to_file))
 
-    // Generate element with all the file-specific users:
+    $('#permdialog_subtitle').text(
+        current_filepath
+            ? 'Permissions shown for the selected item.'
+            : 'Select a file or folder to inspect its permissions.'
+    )
+
+    $('#perm-dialog-advanced-button').prop(
+        'disabled',
+        !(current_filepath && current_filepath in path_to_file)
+    )
+
     file_permission_users.empty()
-    grouped_permissions.attr('username', '') // since we are reloading the user list, reset the username in permission checkboxes
+    grouped_permissions.attr('username', '')
 
     if(current_filepath && current_filepath in path_to_file) {
         file_users = get_file_users(path_to_file[current_filepath])
         file_user_list = make_user_list('permdialog_file_user', file_users, add_attributes = true)
         file_permission_users.append(file_user_list)
+
+        file_permission_users.selectable('refresh')
+
+        const firstUser = file_permission_users.find('[name]').first()
+
+        if (firstUser.length) {
+            file_permission_users.find('.ui-selected').removeClass('ui-selected')
+            firstUser.addClass('ui-selected')
+            file_permission_users.attr('selected_item', firstUser.attr('name'))
+            grouped_permissions.attr('username', firstUser.attr('name'))
+        }
     }
+
     updateRestoreInheritedAvailability()
 })
-
-
 
 // ---- Old code which doesn't use the helper functions starts here ----
 
