@@ -66,6 +66,39 @@
     word-break: break-word;
 }
 
+#permdialog_objname_label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #5a5a5a;
+}
+
+#permdialog_objname_namespan {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #fff4cc;
+    border: 1px solid #e2c86b;
+    color: #2d2d2d;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+#permdialog_objname_namespan.permdialog_objname_namespan--empty {
+    display: none;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    color: #666666;
+    font-size: 14px;
+    font-weight: 500;
+}
+
 #permdialog_file_user_list {
     background: #ffffff;
 }
@@ -119,6 +152,84 @@
     position: fixed;
     bottom: 0;
     right: 0;
+}
+
+.tutorial_perm_icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #c9c9c9;
+    border-radius: 6px;
+    background: #f7f7f7;
+    color: #444444;
+    font-size: 14px;
+}
+
+.tutorial_user_icon,
+.sidebar_user_icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #444444;
+}
+
+.tutorial_user_icon {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #c9c9c9;
+    border-radius: 6px;
+    background: #f7f7f7;
+    font-size: 14px;
+}
+
+#permissions_user_title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar_user_icon {
+    font-size: 16px;
+}
+
+.tutorial_decision_icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+}
+
+.tutorial_decision_icon__allow,
+.tutorial_decision_icon__deny,
+.permission-action-label__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tutorial_decision_icon__allow,
+.permission-action-label--allow .permission-action-label__icon {
+    background: #e6f6ea;
+    color: #1b6e31;
+}
+
+.tutorial_decision_icon__deny,
+.permission-action-label--deny .permission-action-label__icon {
+    background: #fdeaea;
+    color: #a12626;
+}
+
+.permission-action-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 

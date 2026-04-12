@@ -10,7 +10,7 @@ perm_dialog = $(`
         <div class="persistent-permissions-panel__header">
             <div>
                 <h2 id="permdialog_title">Permissions</h2>
-                <div id="permdialog_subtitle">Select a file or folder to inspect its permissions.</div>
+                <div id="permdialog_subtitle">Select a file or folder to inspect its permission .</div>
             </div>
             <div class="undo-redo-controls">
                 <button id="perm_undo_button" type="button">Undo</button>
@@ -33,14 +33,14 @@ $('#perm-dialog-advanced-button').prop('disabled', true)
 // If you pass in valid HTML to $(), it will *create* elements instead of selecting them. (You still have to append them, though)
 obj_name_div = $(`
 <div id="permdialog_objname" class="section">
-    Object Name: 
+    <span id="permdialog_objname_label">Object Name:</span>
     <span class="tooltip-wrapper">
         <span class="info-icon">?</span> 
         <span class="custom-tooltip-text"> 
             The file or folder whose permissions are being viewed and modified.
         </span> 
     </span>
-    <span id="permdialog_objname_namespan"></span> 
+    <span id="permdialog_objname_namespan" class="permdialog_objname_namespan--empty"></span> 
 </div>
 `)
 
@@ -135,16 +135,45 @@ startup_instruction_dialog = define_new_dialog('startup_instruction_dialog', 'Ho
 })
 startup_instruction_dialog.html(`
 <div id="startup_instruction_text">
-    <p>To change a user’s permissions for a file or folder, follow these steps:</p>
-    <ol>
-        <li>Select the file or folder whose permissions you want to change.</li>
-        <li>Select the user whose access you want to update.</li>
-        <li>If the user or group is not listed, add them first.</li>
-        <li>Find the specific permission you want to change</li>
-        <li>Choose whether to <strong>Allow</strong> or <strong>Deny</strong> that permission for the selected user.</li>
-        <li>Repeat for any other permissions you want to change.</li>
-    </ol>
-    <p>If you are not sure what a permission means, hover over the <strong>?</strong> icon next to it to see an explanation.</p>
+  <h3>Change Permissions</h3>
+
+  <div class="tutorial_step">
+    <span class="step_icon tutorial_perm_icon" aria-hidden="true"><span class="fa fa-cog"></span></span>
+    <span class="step_text"><strong>Select</strong> a file or folder by clicking the permissions button</span>
+  </div>
+
+  <div class="tutorial_arrow">↓</div>
+
+  <div class="tutorial_step">
+    <span class="step_icon tutorial_user_icon" aria-hidden="true"><span class="oi oi-person"></span></span>
+    <span class="step_text"><strong>Select</strong> a user or group</span>
+  </div>
+
+  <div class="tutorial_arrow">↓</div>
+
+  <div class="tutorial_step">
+    <span class="step_text">Not listed? <strong>Add them first</strong></span>
+  </div>
+
+  <div class="tutorial_arrow">↓</div>
+
+  <div class="tutorial_step">
+    <span class="step_text"><strong>Pick</strong> the permission to change</span>
+  </div>
+
+  <div class="tutorial_arrow">↓</div>
+
+  <div class="tutorial_step">
+    <span class="step_icon tutorial_decision_icon" aria-hidden="true">
+      <span class="tutorial_decision_icon__allow">✓</span>
+      <span class="tutorial_decision_icon__deny">✕</span>
+    </span>
+    <span class="step_text">Choose <strong>Allow</strong> or <strong>Deny</strong></span>
+  </div>
+
+  <div class="tutorial_note">
+    <strong>?</strong> Hover over the help icon for permission details
+  </div>
 </div>
 `)
 
@@ -306,7 +335,7 @@ perm_remove_user_button.click(function(){
 
 // --- Append all the elements to the permissions dialog in the right order: --- 
 perm_dialog.append(obj_name_div)
-perm_dialog.append($('<div id="permissions_user_title">Select user from below:</div>'))
+perm_dialog.append($('<div id="permissions_user_title"><span class="sidebar_user_icon" aria-hidden="true"><span class="oi oi-person"></span></span><span>Select user from below:</span></div>'))
 perm_dialog.append(file_permission_users)
 perm_dialog.append(perm_add_user_select)
 perm_add_user_select.append(perm_remove_user_button) // Cheating a bit again - add the remove button the the 'add user select' div, just so it shows up on the same line.
@@ -382,7 +411,9 @@ define_attribute_observer(perm_dialog, 'filepath', function(){
     $('#advdialog').attr('filepath', current_filepath)
 
     grouped_permissions.attr('filepath', current_filepath) // set filepath for permission checkboxes
-    $('#permdialog_objname_namespan').text(current_filepath || 'Select a file or folder') // set filepath for Object Name text
+    $('#permdialog_objname_namespan')
+        .text(current_filepath || '')
+        .toggleClass('permdialog_objname_namespan--empty', !current_filepath)
     $('#permdialog_subtitle').text(current_filepath ? 'Permissions shown for the selected item.' : 'Select a file or folder to inspect its permissions.')
     $('#perm-dialog-advanced-button').prop('disabled', !(current_filepath && current_filepath in path_to_file))
 
