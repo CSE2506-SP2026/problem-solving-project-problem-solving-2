@@ -76,7 +76,7 @@
     color: #5a5a5a;
 }
 
-#permdialog_objname_namespan {
+#permdialog_objname_namespan, #permdialog_grouped_permissions_header_username {
     display: inline-block;
     margin-top: 6px;
     padding: 8px 12px;

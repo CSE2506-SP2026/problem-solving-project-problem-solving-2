@@ -230,7 +230,7 @@ function showStatus(message) {
     el.text(message).addClass('permdialog-status--active')
     setTimeout(() => {
         el.text('').removeClass('permdialog-status--active')
-    }, 1200)
+    }, 1800)
 }
 
 // Make button to add a new user to the list:
