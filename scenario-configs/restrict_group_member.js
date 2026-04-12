@@ -1,7 +1,7 @@
 // Scenario: remove specified permission type(s) from a given user and file; but the permission is actually inherited from the folder
 
 employees = ['employee1', 'employee2', 'employee3']
-employee_group = make_group('employees', employees)
+employee_group = make_group('employees GROUP (for a specific member, click "add user")', employees)
 
 // equivalent to 'Read' and 'Modify' permission groups in baseline interface
 read_modify_acl = [permissions.LIST, permissions.READ_ATTR, permissions.READ_EXTENDED_ATTR, permissions.READ_PERMS, permissions.WRITE_DATA, permissions.APPEND_DATA, permissions.WRITE_ATTR, permissions.WRITE_EXTENDED_ATTR, 
