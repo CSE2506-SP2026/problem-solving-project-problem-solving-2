@@ -21,6 +21,41 @@ perm_dialog = $(`
 `)
 $('#sidepanel').append(perm_dialog)
 
+$(document).on('click', '#perm_undo_button', function() {
+    if (permissionUndoStack.length === 0) return;
+
+    let currentState = snapshotPermissionState();
+    let previousState = permissionUndoStack.pop();
+
+    permissionRedoStack.push(currentState);
+    restorePermissionState(previousState);
+
+    if (grouped_permissions && grouped_permissions.data('refreshPermTable')) {
+        grouped_permissions.data('refreshPermTable')();
+    }
+
+    updateUndoRedoButtons();
+});
+
+$(document).on('click', '#perm_redo_button', function() {
+    if (permissionRedoStack.length === 0) return;
+
+    let currentState = snapshotPermissionState();
+    let nextState = permissionRedoStack.pop();
+
+    permissionUndoStack.push(currentState);
+    restorePermissionState(nextState);
+
+    if (grouped_permissions && grouped_permissions.data('refreshPermTable')) {
+        grouped_permissions.data('refreshPermTable')();
+    }
+
+    updateUndoRedoButtons();
+});
+
+updateUndoRedoButtons();
+
+
 $('#perm-dialog-advanced-button').click(function() {
     let filepath = perm_dialog.attr('filepath')
     if(filepath && filepath.length > 0) {
@@ -341,6 +376,10 @@ perm_dialog.append(perm_add_user_select)
 perm_add_user_select.append(perm_remove_user_button) // Cheating a bit again - add the remove button the the 'add user select' div, just so it shows up on the same line.
 const perm_action_status = $('<span id="perm_action_status" class="perm-action-status" aria-live="polite"></span>');
 perm_add_user_select.append(perm_action_status);
+//TOGGLE
+const allowAllToggle = $('<button id="perm_allow_toggle" class="ui-button ui-widget ui-corner-all">Full Access</button>')
+// TOGGLE
+perm_dialog.append(allowAllToggle)
 perm_dialog.append(grouped_permissions)
 perm_dialog.append(perm_inherited_legend)
 
@@ -354,6 +393,24 @@ perm_restore_inherited_div = $(`
         </span>
     </span>
 </div>`)
+
+//TOGGLE
+$('#perm_allow_toggle').click(function() {
+
+    const allowCheckboxes = $('#permdialog_grouped_permissions input.perm_checkbox[ptype="allow"]')
+    const allChecked = allowCheckboxes.length > 0 &&
+        allowCheckboxes.filter(':checked').length === allowCheckboxes.length
+
+    allowCheckboxes.each(function() {
+        const checkbox = $(this)
+
+        if (checkbox.prop('disabled')) return
+
+        checkbox.prop('checked', !allChecked).trigger('change')
+    })
+
+    $(this).text(allChecked ? 'Allow All' : 'Clear Full Access')
+})
 
 perm_restore_inherited_div.find('#perm_restore_inherited_checkbox').on('change', function() {
     if(!$(this).prop('checked')) return
