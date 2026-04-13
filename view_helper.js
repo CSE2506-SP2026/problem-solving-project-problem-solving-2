@@ -409,9 +409,19 @@ function define_permission_checkboxes(
 
     for (const p of group.perms) {
       let p_id = p.replace(/[ \\/]/g, "_");
+      let tooltip = permissionTooltips[p] || "";
+
       let row = $(`<tr id="${id_prefix}_row_${p_id}">
-            <td id="${id_prefix}_${p_id}_name">${p}</td>
-        </tr>`);
+          <td id="${id_prefix}_${p_id}_name">
+              ${p}
+              <span class="tooltip-wrapper">
+                  <span class="info-icon">?</span>
+                  <span class="custom-tooltip-text">
+                      ${tooltip}
+                  </span>
+              </span>
+          </td>
+      </tr>`);
       for (let ace_type of ["allow", "deny"]) {
         row.append(`<td id="${id_prefix}_${p_id}_${ace_type}_cell">
                 <input type="checkbox" id="${id_prefix}_${p_id}_${ace_type}_checkbox" ptype="${ace_type}" class="perm_checkbox" permission="${p}" ></input>
