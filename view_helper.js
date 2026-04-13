@@ -633,79 +633,9 @@ function define_permission_checkboxes(
 
   perm_table.data("refreshPermTable", update_perm_table);
 
-        if(!filepath || !username || !(filepath in path_to_file) || !(username in all_users)) {
-            update_perm_table()
-            return
-        }
-
-        let overrideAction = null
-        let confirmMsg = ''
-
-        if(snap && snap.permission === permission) {
-            if(ptype === 'deny' && newChecked && snap.allowChecked && snap.allowInherited && !snap.prevThisChecked) {
-                overrideAction = 'explicit_deny'
-                confirmMsg = 'Checking Deny overrides inherited Allow. Continue?'
-            } else if(ptype === 'allow' && newChecked && snap.denyChecked && snap.denyInherited && !snap.prevThisChecked) {
-                overrideAction = 'explicit_allow'
-                confirmMsg = 'Checking Allow overrides inherited Deny. Continue?'
-            }
-        }
-
-        if(overrideAction) {
-            $t.prop('checked', snap.prevThisChecked)
-            inheritedOverrideConfirm(confirmMsg, function(){
-                permissionUndoStack.push(snapshotPermissionState());
-                permissionRedoStack = [];
-                applyOverrideAction(filepath, username, permission, overrideAction)
-                update_perm_table()
-                if(typeof hooks.onAfterInheritedOverride === 'function') {
-                    hooks.onAfterInheritedOverride(filepath, username)
-                }
-            }, function(){
-                update_perm_table()
-            })
-            return
-        }
-
-        permissionUndoStack.push(snapshotPermissionState());
-        permissionRedoStack = [];
-
-        toggle_permission(filepath, username, permission, ptype, newChecked);
-        update_perm_table();
-        updateUndoRedoButtons();
-    })
-
-    perm_table.data('refreshPermTable', update_perm_table)
-
-    return perm_table
+  return perm_table;
 }
 
-//UNDO REDO
-let permissionUndoStack = [];
-let permissionRedoStack = [];
-
-function snapshotPermissionState() {
-    let snapshot = {};
-
-    for (let path in path_to_file) {
-        snapshot[path] = JSON.parse(JSON.stringify(path_to_file[path].acl));
-    }
-
-    return snapshot;
-}
-
-function restorePermissionState(snapshot) {
-    for (let path in snapshot) {
-        if (path_to_file[path]) {
-            path_to_file[path].acl = JSON.parse(JSON.stringify(snapshot[path]));
-        }
-    }
-}
-
-function updateUndoRedoButtons() {
-    $('#perm_undo_button').prop('disabled', permissionUndoStack.length === 0);
-    $('#perm_redo_button').prop('disabled', permissionRedoStack.length === 0);
-}
 
 // Define a list of permission groups for a given file, for all users
 function define_file_permission_groups_list(id_prefix){
