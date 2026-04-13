@@ -213,8 +213,18 @@ function define_grouped_permission_checkboxes(id_prefix, which_groups = null) {
         <tr id="${id_prefix}_header">
             <th id="${id_prefix}_header_p" width="99%">Permissions for <span id="${id_prefix}_header_username"></span>
             </th>
-            <th id="${id_prefix}_header_allow">Allow</th>
-            <th id="${id_prefix}_header_deny">Deny</th>
+            <th id="${id_prefix}_header_allow"><span class="permission-action-label permission-action-label--allow"><span class="permission-action-label__icon">✓</span><span>Allow</span></span>
+                <span class="info-icon">?</span>
+                <span class="custom-tooltip-text">
+                    Grants the selected permission to the user.
+                </span>
+            </th>
+            <th id="${id_prefix}_header_deny"><span class="permission-action-label permission-action-label--deny"><span class="permission-action-label__icon">✕</span><span>Deny</span></span>
+                <span class="info-icon">?</span>
+                <span class="custom-tooltip-text">
+                    Deny overrides Allow. Use this to explicitly block access.
+                </span>
+            </th>
         </tr>
     </table>
     `)
@@ -293,195 +303,347 @@ function define_grouped_permission_checkboxes(id_prefix, which_groups = null) {
 
 // define an element which will display *individual* permissions for a given file and user, and allow for changing them by checking/unchecking the checkboxes.
 // optional hooks.inheritedOverrideConfirm(message, onConfirm, onCancel) — called when the user is about to override an inherited permission; must invoke exactly one of onConfirm/onCancel.
-function define_permission_checkboxes(id_prefix, which_permissions = null, hooks = {}){
-    // Set up table and header:
-    let perm_table = $(`
+function define_permission_checkboxes(
+  id_prefix,
+  which_permissions = null,
+  hooks = {},
+) {
+  // Set up table and header:
+  let perm_table = $(`
     <table id="${id_prefix}" class="ui-widget-content" width="100%">
         <tr id="${id_prefix}_header">
             <th id="${id_prefix}_header_p" width="99%">Permissions for <span id="${id_prefix}_header_username"></span>
             </th>
-            <th id="${id_prefix}_header_allow">Allow</th>
-            <th id="${id_prefix}_header_deny">Deny</th>
+            <th id="${id_prefix}_header_allow"><span class="permission-action-label permission-action-label--allow"><span class="permission-action-label__icon">✓</span><span>Allow</span></span>
+                <span class="info-icon">?</span>
+                <span class="custom-tooltip-text">
+                    Grants the selected permission to the user.
+                </span>
+            
+            </th>
+            <th id="${id_prefix}_header_deny"><span class="permission-action-label permission-action-label--deny"><span class="permission-action-label__icon">✕</span><span>Deny</span></span>
+                <span class="info-icon">?</span>
+                <span class="custom-tooltip-text">
+                    Deny overrides Allow. Use this to explicitly block access.
+                </span>
+            
+            </th>
         </tr>
     </table>
-    `)
+    `);
 
-    // If no subset of permissions is passed in, use all of them.
-    if(which_permissions === null) {
+    // !!! OLD HELPER FUNCTION THAT I HAD TO CHANGE TO MANUALLY REORDER AND ADD HEADERS
+  // If no subset of permissions is passed in, use all of them.
+  /*  if(which_permissions === null) {
         which_permissions = Object.values(permissions)
     }
     // For each type of permission, create a row:
     for(let p of which_permissions){
         let p_id = p.replace(/[ \/]/g, '_') 
+        // For each type of permission, create a row:
+        let tooltip = permissionTooltips[Object.keys(permissions).find(k => permissions[k] === p)] || ''
+            
         let row = $(`<tr id="${id_prefix}_row_${p_id}">
-            <td id="${id_prefix}_${p_id}_name">${p}</td>
-        </tr>`)
+            <td id="${id_prefix}_${p_id}_name">
+            ${p}
+            <span class="tooltip-wrapper">
+                <span class="info-icon">?</span>
+                <span class="custom-tooltip-text">
+                    ${tooltip}
+                </span>
+            </span>
+        </td>
+    `)
+
         // Add allow and deny checkboxes:
         for(let ace_type of ['allow', 'deny']) {
             row.append(`<td id="${id_prefix}_${p_id}_${ace_type}_cell">
                 <input type="checkbox" id="${id_prefix}_${p_id}_${ace_type}_checkbox" ptype="${ace_type}" class="perm_checkbox" permission="${p}" ></input>
             </td>`)
         }
+        row.append(`</tr>`)
         perm_table.append(row)
+    } */
+
+  // Build grouped permissions in a fixed order
+  const permissionGroups = [
+    {
+      title: "Read",
+      perms: [
+        permissions.LIST,
+        permissions.READ_ATTR,
+        permissions.READ_EXTENDED_ATTR,
+        permissions.READ_PERMS,
+      ],
+    },
+    {
+      title: "Write",
+      perms: [
+        permissions.WRITE_DATA,
+        permissions.APPEND_DATA,
+        permissions.WRITE_ATTR,
+        permissions.WRITE_EXTENDED_ATTR,
+      ],
+    },
+    {
+      title: "Delete",
+      perms: [permissions.DELETE_SUB, permissions.DELETE],
+    },
+    {
+      title: "Special",
+      perms: [
+        permissions.EXECUTE,
+        permissions.CHANGE_PERMS,
+        permissions.TAKE_OWNERSHIP],
+    },
+  ];
+
+  // For each group, add a header row and its permissions
+  for (const group of permissionGroups) {
+    let header = $(`
+    <tr class="perm-group-header">
+        <td colspan="3">${group.title}</td>
+    </tr>
+`   );
+    perm_table.append(header);
+
+    for (const p of group.perms) {
+      let p_id = p.replace(/[ \\/]/g, "_");
+      let tooltip = permissionTooltips[p] || "";
+
+      let row = $(`<tr id="${id_prefix}_row_${p_id}">
+          <td id="${id_prefix}_${p_id}_name">
+              ${p}
+              <span class="tooltip-wrapper">
+                  <span class="info-icon">?</span>
+                  <span class="custom-tooltip-text">
+                      ${tooltip}
+                  </span>
+              </span>
+          </td>
+      </tr>`);
+      for (let ace_type of ["allow", "deny"]) {
+        row.append(`<td id="${id_prefix}_${p_id}_${ace_type}_cell">
+                <input type="checkbox" id="${id_prefix}_${p_id}_${ace_type}_checkbox" ptype="${ace_type}" class="perm_checkbox" permission="${p}" ></input>
+            </td>`);
+      }
+      perm_table.append(row);
+    }
+  }
+
+  perm_table.find(".perm_checkbox").prop("disabled", true); // disable all checkboxes to start
+
+  let update_perm_table = function () {
+    // get current settings:
+    let username = perm_table.attr("username");
+    let filepath = perm_table.attr("filepath");
+    // if both properties are set correctly:
+    if (
+      username &&
+      username.length > 0 &&
+      username in all_users &&
+      filepath &&
+      filepath.length > 0 &&
+      filepath in path_to_file
+    ) {
+      // clear previous checkbox state:
+      perm_table.find(".perm_checkbox").prop("disabled", false);
+      perm_table.find(".perm_checkbox").prop("checked", false);
+      perm_table
+        .find(".perm_checkbox")
+        .removeClass("perm-inherited-backing perm-inherited-override-faded");
+
+      //change name on table:
+      $(`#${id_prefix}_header_username`).text(username);
+
+      // Get permissions:
+      let file_obj = path_to_file[filepath];
+      let user_obj = all_users[username];
+      let all_perms = get_total_permissions(file_obj, username);
+
+      function hasExplicitAllowOnFile(perm) {
+        return file_obj.acl.some(function (ace) {
+          return (
+            ace.who === user_obj && ace.permission === perm && ace.is_allow_ace
+          );
+        });
+      }
+      function hasExplicitDenyOnFile(perm) {
+        return file_obj.acl.some(function (ace) {
+          return (
+            ace.who === user_obj && ace.permission === perm && !ace.is_allow_ace
+          );
+        });
+      }
+
+      for (ace_type in all_perms) {
+        // 'allow' and 'deny'
+        for (allowed_perm in all_perms[ace_type]) {
+          let p_id = allowed_perm.replace(/[ \/]/g, "_");
+          let checkbox = perm_table.find(
+            `#${id_prefix}_${p_id}_${ace_type}_checkbox`,
+          );
+          let inherited = all_perms[ace_type][allowed_perm].inherited;
+          let overridden = false;
+          if (
+            ace_type === "allow" &&
+            inherited &&
+            hasExplicitDenyOnFile(allowed_perm)
+          ) {
+            overridden = true;
+          }
+          if (
+            ace_type === "deny" &&
+            inherited &&
+            hasExplicitAllowOnFile(allowed_perm)
+          ) {
+            overridden = true;
+          }
+          checkbox.prop("checked", true);
+          checkbox.removeClass(
+            "perm-inherited-backing perm-inherited-override-faded",
+          );
+          if (inherited) {
+            checkbox.addClass("perm-inherited-backing");
+            if (overridden) {
+              checkbox.addClass("perm-inherited-override-faded");
+            }
+          }
+        }
+      }
+      perm_table.find(".perm_checkbox").each(function () {
+        let $cb = $(this);
+        $cb.prop("disabled", $cb.hasClass("perm-inherited-backing"));
+      });
+    } else {
+      perm_table.find(".perm_checkbox").prop("disabled", true);
+      perm_table.find(".perm_checkbox").prop("checked", false);
+      perm_table
+        .find(".perm_checkbox")
+        .removeClass("perm-inherited-backing perm-inherited-override-faded");
+      $(`#${id_prefix}_header_username`).text("");
+    }
+  };
+
+  define_attribute_observer(perm_table, "username", update_perm_table);
+  define_attribute_observer(perm_table, "filepath", update_perm_table);
+
+  let permInteractionSnapshot = null;
+  perm_table.on("mousedown", ".perm_checkbox", function () {
+    let filepath = perm_table.attr("filepath");
+    let username = perm_table.attr("username");
+    let $t = $(this);
+    let permission = $t.attr("permission");
+    if (
+      !filepath ||
+      !username ||
+      !(filepath in path_to_file) ||
+      !(username in all_users) ||
+      !permission
+    ) {
+      permInteractionSnapshot = null;
+      return;
+    }
+    let perms = get_total_permissions(path_to_file[filepath], username);
+    permInteractionSnapshot = {
+      permission: permission,
+      ptype: $t.attr("ptype"),
+      allowChecked: !!perms.allow[permission],
+      denyChecked: !!perms.deny[permission],
+      allowInherited: !!(
+        perms.allow[permission] && perms.allow[permission].inherited
+      ),
+      denyInherited: !!(
+        perms.deny[permission] && perms.deny[permission].inherited
+      ),
+      prevThisChecked: $t.prop("checked"),
+    };
+  });
+
+  let inheritedOverrideConfirm =
+    hooks.inheritedOverrideConfirm ||
+    function (message, onConfirm, onCancel) {
+      if (window.confirm(message)) onConfirm();
+      else onCancel();
+    };
+
+  function applyOverrideAction(filepath, username, permission, action) {
+    if (action === "explicit_deny") {
+      toggle_permission(filepath, username, permission, "deny", true);
+    } else if (action === "explicit_allow") {
+      toggle_permission(filepath, username, permission, "allow", true);
+    }
+  }
+
+  perm_table.find(".perm_checkbox").on("change", function () {
+    let filepath = perm_table.attr("filepath");
+    let username = perm_table.attr("username");
+    let $t = $(this);
+    let permission = $t.attr("permission");
+    let ptype = $t.attr("ptype");
+    let newChecked = $t.prop("checked");
+    let snap = permInteractionSnapshot;
+
+    if (
+      !filepath ||
+      !username ||
+      !(filepath in path_to_file) ||
+      !(username in all_users)
+    ) {
+      update_perm_table();
+      return;
     }
 
-    perm_table.find('.perm_checkbox').prop('disabled', true)// disable all checkboxes to start
+    let overrideAction = null;
+    let confirmMsg = "";
 
-    let update_perm_table = function(){
-
-        // get current settings:
-        let username = perm_table.attr('username')
-        let filepath = perm_table.attr('filepath')
-        // if both properties are set correctly:
-        if( username && username.length > 0 && (username in all_users) &&
-            filepath && filepath.length > 0 && (filepath in path_to_file)) {
-            
-            // clear previous checkbox state:
-            perm_table.find('.perm_checkbox').prop('disabled', false)
-            perm_table.find('.perm_checkbox').prop('checked', false)
-            perm_table.find('.perm_checkbox').removeClass('perm-inherited-backing perm-inherited-override-faded')
-
-            //change name on table:
-            $(`#${id_prefix}_header_username`).text(username)
-
-            // Get permissions:
-            let file_obj = path_to_file[filepath]
-            let user_obj = all_users[username]
-            let all_perms = get_total_permissions(file_obj, username)
-
-            function hasExplicitAllowOnFile(perm) {
-                return file_obj.acl.some(function(ace) {
-                    return ace.who === user_obj && ace.permission === perm && ace.is_allow_ace
-                })
-            }
-            function hasExplicitDenyOnFile(perm) {
-                return file_obj.acl.some(function(ace) {
-                    return ace.who === user_obj && ace.permission === perm && !ace.is_allow_ace
-                })
-            }
-
-            for( ace_type in all_perms) { // 'allow' and 'deny'
-                for(allowed_perm in all_perms[ace_type]) {
-                    let p_id = allowed_perm.replace(/[ \/]/g, '_') 
-                    let checkbox = perm_table.find(`#${id_prefix}_${p_id}_${ace_type}_checkbox`)
-                    let inherited = all_perms[ace_type][allowed_perm].inherited
-                    let overridden = false
-                    if(ace_type === 'allow' && inherited && hasExplicitDenyOnFile(allowed_perm)) {
-                        overridden = true
-                    }
-                    if(ace_type === 'deny' && inherited && hasExplicitAllowOnFile(allowed_perm)) {
-                        overridden = true
-                    }
-                    checkbox.prop('checked', true)
-                    checkbox.removeClass('perm-inherited-backing perm-inherited-override-faded')
-                    if(inherited) {
-                        checkbox.addClass('perm-inherited-backing')
-                        if(overridden) {
-                            checkbox.addClass('perm-inherited-override-faded')
-                        }
-                    }
-                }
-            }
-            // Inherited values are not directly clickable; override only via the opposite Allow/Deny column.
-            perm_table.find('.perm_checkbox').each(function(){
-                let $cb = $(this)
-                $cb.prop('disabled', $cb.hasClass('perm-inherited-backing'))
-            })
-        }
-        else {
-            // can't get permissions for this username/filepath - reset everything into a blank state
-            perm_table.find('.perm_checkbox').prop('disabled', true)
-            perm_table.find('.perm_checkbox').prop('checked', false)
-            perm_table.find('.perm_checkbox').removeClass('perm-inherited-backing perm-inherited-override-faded')
-            $(`#${id_prefix}_header_username`).text('')
-        }
+    if (snap && snap.permission === permission) {
+      if (
+        ptype === "deny" &&
+        newChecked &&
+        snap.allowChecked &&
+        snap.allowInherited &&
+        !snap.prevThisChecked
+      ) {
+        overrideAction = "explicit_deny";
+        confirmMsg = "Checking Deny overrides inherited Allow. Continue?";
+      } else if (
+        ptype === "allow" &&
+        newChecked &&
+        snap.denyChecked &&
+        snap.denyInherited &&
+        !snap.prevThisChecked
+      ) {
+        overrideAction = "explicit_allow";
+        confirmMsg = "Checking Allow overrides inherited Deny. Continue?";
+      }
     }
 
-    define_attribute_observer(perm_table, 'username', update_perm_table)
-    define_attribute_observer(perm_table, 'filepath', update_perm_table)
-
-    let permInteractionSnapshot = null
-    perm_table.on('mousedown', '.perm_checkbox', function(){
-        let filepath = perm_table.attr('filepath')
-        let username = perm_table.attr('username')
-        let $t = $(this)
-        let permission = $t.attr('permission')
-        if(!filepath || !username || !(filepath in path_to_file) || !(username in all_users) || !permission) {
-            permInteractionSnapshot = null
-            return
-        }
-        let perms = get_total_permissions(path_to_file[filepath], username)
-        permInteractionSnapshot = {
-            permission: permission,
-            ptype: $t.attr('ptype'),
-            allowChecked: !!perms.allow[permission],
-            denyChecked: !!perms.deny[permission],
-            allowInherited: !!(perms.allow[permission] && perms.allow[permission].inherited),
-            denyInherited: !!(perms.deny[permission] && perms.deny[permission].inherited),
-            prevThisChecked: $t.prop('checked'),
-        }
-    })
-
-    let inheritedOverrideConfirm = hooks.inheritedOverrideConfirm || function(message, onConfirm, onCancel){
-        if(window.confirm(message)) onConfirm(); else onCancel()
+    if (overrideAction) {
+      $t.prop("checked", snap.prevThisChecked);
+      inheritedOverrideConfirm(
+        confirmMsg,
+        function () {
+          applyOverrideAction(filepath, username, permission, overrideAction);
+          update_perm_table();
+          if (typeof hooks.onAfterInheritedOverride === "function") {
+            hooks.onAfterInheritedOverride(filepath, username);
+          }
+        },
+        function () {
+          update_perm_table();
+        },
+      );
+      return;
     }
 
-    function applyOverrideAction(filepath, username, permission, action){
-        if(action === 'explicit_deny') {
-            toggle_permission(filepath, username, permission, 'deny', true)
-        } else if(action === 'explicit_allow') {
-            toggle_permission(filepath, username, permission, 'allow', true)
-        }
-    }
+    toggle_permission(filepath, username, permission, ptype, newChecked);
+    update_perm_table();
+  });
 
-    perm_table.find('.perm_checkbox').on('change', function(){
-        let filepath = perm_table.attr('filepath')
-        let username = perm_table.attr('username')
-        let $t = $(this)
-        let permission = $t.attr('permission')
-        let ptype = $t.attr('ptype')
-        let newChecked = $t.prop('checked')
-        let snap = permInteractionSnapshot
+  perm_table.data("refreshPermTable", update_perm_table);
 
-        if(!filepath || !username || !(filepath in path_to_file) || !(username in all_users)) {
-            update_perm_table()
-            return
-        }
-
-        let overrideAction = null
-        let confirmMsg = ''
-
-        if(snap && snap.permission === permission) {
-            if(ptype === 'deny' && newChecked && snap.allowChecked && snap.allowInherited && !snap.prevThisChecked) {
-                overrideAction = 'explicit_deny'
-                confirmMsg = 'Checking Deny overrides inherited Allow. Continue?'
-            } else if(ptype === 'allow' && newChecked && snap.denyChecked && snap.denyInherited && !snap.prevThisChecked) {
-                overrideAction = 'explicit_allow'
-                confirmMsg = 'Checking Allow overrides inherited Deny. Continue?'
-            }
-        }
-
-        if(overrideAction) {
-            $t.prop('checked', snap.prevThisChecked)
-            inheritedOverrideConfirm(confirmMsg, function(){
-                applyOverrideAction(filepath, username, permission, overrideAction)
-                update_perm_table()
-                if(typeof hooks.onAfterInheritedOverride === 'function') {
-                    hooks.onAfterInheritedOverride(filepath, username)
-                }
-            }, function(){
-                update_perm_table()
-            })
-            return
-        }
-
-        toggle_permission(filepath, username, permission, ptype, newChecked)
-        update_perm_table()
-    })
-
-    perm_table.data('refreshPermTable', update_perm_table)
-
-    return perm_table
+  return perm_table;
 }
 
 

@@ -10,9 +10,12 @@ perm_dialog = $(`
         <div class="persistent-permissions-panel__header">
             <div>
                 <h2 id="permdialog_title">Permissions</h2>
-                <div id="permdialog_subtitle">Select a file or folder to inspect its permissions.</div>
+                <div id="permdialog_subtitle">Select a file or folder to inspect its permission .</div>
             </div>
-            <button id="perm-dialog-advanced-button" class="ui-button ui-widget ui-corner-all">Advanced</button>
+            <div class="undo-redo-controls">
+                <button id="perm_undo_button" type="button">Undo</button>
+                <button id="perm_redo_button" type="button">Redo</button>
+            </div>
         </div>
     </div>
 `)
@@ -28,12 +31,22 @@ $('#perm-dialog-advanced-button').prop('disabled', true)
 
 // Make the initial "Object Name:" text:
 // If you pass in valid HTML to $(), it will *create* elements instead of selecting them. (You still have to append them, though)
-obj_name_div = $('<div id="permdialog_objname" class="section">Object Name: <span id="permdialog_objname_namespan"></span> </div>')
+obj_name_div = $(`
+<div id="permdialog_objname" class="section">
+    <span id="permdialog_objname_label">Object Name:</span>
+    <span class="tooltip-wrapper">
+        <span class="info-icon">?</span> 
+        <span class="custom-tooltip-text"> 
+            The file or folder whose permissions are being viewed and modified.
+        </span> 
+    </span>
+    <span id="permdialog_objname_namespan" class="permdialog_objname_namespan--empty"></span> 
+</div>
+`)
 
 //Make the div with the explanation about special permissions/advanced settings:
 advanced_expl_div = $('<div id="permdialog_advanced_explantion_text">For special permissions or advanced settings, click Advanced.</div>')
 
-// Confirm before adding explicit ACEs that override inherited permissions (sidebar permissions table)
 inherited_override_dialog = define_new_dialog('inherited_override_confirm_dialog', 'Override inherited permission?', {
     buttons: {
         Yes: {
@@ -108,6 +121,62 @@ restore_inherited_confirm_dialog.on('dialogclose', function() {
     restore_inherited_confirm_dialog.removeData('restoreUn')
 })
 
+startup_instruction_dialog = define_new_dialog('startup_instruction_dialog', 'How to use this interface', {
+    width: 560,
+    buttons: {
+        OK: {
+            text: 'OK',
+            id: 'startup-instruction-ok-button',
+            click: function() {
+                $( this ).dialog('close')
+            },
+        },
+    },
+})
+startup_instruction_dialog.html(`
+<div id="startup_instruction_text">
+  <h3>Change Permissions</h3>
+
+  <div class="tutorial_step">
+    <span class="step_icon tutorial_perm_icon" aria-hidden="true"><span class="fa fa-cog"></span></span>
+    <span class="step_text"><strong>Select</strong> a file or folder by clicking the permissions button</span>
+  </div>
+
+  <div class="tutorial_arrow">↓</div>
+
+  <div class="tutorial_step">
+    <span class="step_icon tutorial_user_icon" aria-hidden="true"><span class="oi oi-person"></span></span>
+    <span class="step_text"><strong>Select</strong> a user or group</span>
+  </div>
+
+  <div class="tutorial_arrow">↓</div>
+
+  <div class="tutorial_step">
+    <span class="step_text">Not listed? <strong>Add them first</strong></span>
+  </div>
+
+  <div class="tutorial_arrow">↓</div>
+
+  <div class="tutorial_step">
+    <span class="step_text"><strong>Pick</strong> the permission to change</span>
+  </div>
+
+  <div class="tutorial_arrow">↓</div>
+
+  <div class="tutorial_step">
+    <span class="step_icon tutorial_decision_icon" aria-hidden="true">
+      <span class="tutorial_decision_icon__allow">✓</span>
+      <span class="tutorial_decision_icon__deny">✕</span>
+    </span>
+    <span class="step_text">Choose <strong>Allow</strong> or <strong>Deny</strong></span>
+  </div>
+
+  <div class="tutorial_note">
+    <strong>?</strong> Hover over the help icon for permission details
+  </div>
+</div>
+`)
+
 function updateRestoreInheritedAvailability() {
     let fp = perm_dialog.attr('filepath')
     let un = grouped_permissions.attr('username')
@@ -121,10 +190,15 @@ function updateRestoreInheritedAvailability() {
     cb.prop('disabled', !canRestore)
 }
 
-// Legend (placed directly under the permissions table)
+// Gray check key
 perm_inherited_legend = $(`<div id="permdialog_inherited_key" class="perm-inherited-key section" role="note">
     <span class="perm-inherited-key__text">*Gray checks indicate inherited permissions.</span>
+    <br>
+    <span class="perm-inherited-key__header" style="text-decoration: underline; font-weight: bold;">
+        To Push/Refresh Inheritance:
+    </span>
 </div>`)
+
 
 // Make the (full) permission checkboxes table:
 grouped_permissions = define_permission_checkboxes('permdialog_grouped_permissions', null, {
@@ -150,8 +224,17 @@ file_permission_users.css({
     'height':'80px',
 })
 
+function showStatus(message) {
+    const el = $('#perm_action_status')
+    if(!el.length) return
+    el.text(message).addClass('permdialog-status--active')
+    setTimeout(() => {
+        el.text('').removeClass('permdialog-status--active')
+    }, 1200)
+}
+
 // Make button to add a new user to the list:
-perm_add_user_select = define_new_user_select_field('perm_add_user', 'Add...', on_user_change = function(selected_user){
+perm_add_user_select = define_new_user_select_field('perm_add_user', 'Add User', on_user_change = function(selected_user){
     // console.log("add...")
     let filepath = perm_dialog.attr('filepath')
     if(selected_user && (selected_user.length > 0) && (selected_user in all_users)) { // sanity check that a user is actually selected (and exists)
@@ -159,11 +242,11 @@ perm_add_user_select = define_new_user_select_field('perm_add_user', 'Add...', o
         if( file_permission_users.find(`#${expected_user_elem_id}`).length === 0 ) { // if such a user element doesn't already exist
             new_user_elem = make_user_elem('permdialog_file_user', selected_user)
             file_permission_users.append(new_user_elem)
+            showStatus(`Added ${selected_user}`)
         }
     }    
 })
 perm_add_user_select.find('span').hide()// Cheating a bit - just show the button from the user select; hide the part that displays the username.
-
 
 // -- Make button to remove currently-selected user; also make some dialogs that may pop up when user clicks this. --
 
@@ -209,6 +292,8 @@ let are_you_sure_dialog = define_new_dialog('are_you_sure_dialog', "Are you sure
                 $( this ).dialog( "close" );
                 updateRestoreInheritedAvailability()
 
+                showStatus(`Removed ${username}`)
+
             },
         },
         No: {
@@ -224,7 +309,7 @@ let are_you_sure_dialog = define_new_dialog('are_you_sure_dialog', "Are you sure
 are_you_sure_dialog.text('Do you want to remove permissions for this user?')
 
 // Make actual "remove" button:
-perm_remove_user_button  = $('<button id="perm_remove_user" class="ui-button ui-widget ui-corner-all">Remove</button>')
+perm_remove_user_button  = $('<button id="perm_remove_user" class="ui-button ui-widget ui-corner-all">Remove Selected User</button>')
 perm_remove_user_button.click(function(){
     // Get the current user and filename we are working with:
     let selected_username = file_permission_users.attr('selected_item')
@@ -250,17 +335,68 @@ perm_remove_user_button.click(function(){
 
 // --- Append all the elements to the permissions dialog in the right order: --- 
 perm_dialog.append(obj_name_div)
-perm_dialog.append($('<div id="permissions_user_title">Group or user names:</div>'))
+perm_dialog.append($('<div id="permissions_user_title"><span class="sidebar_user_icon" aria-hidden="true"><span class="oi oi-person"></span></span><span>Select user from below:</span></div>'))
 perm_dialog.append(file_permission_users)
+
+//auto-click 
+setTimeout(() => {
+    file_permission_users.selectable('refresh');
+
+    const firstUser = $('#permdialog_file_user_list .ui-selectee').first();
+
+    if (firstUser.length) {
+        $('#permdialog_file_user_list .ui-selectee').removeClass('ui-selected');
+        firstUser.addClass('ui-selected');
+
+        const username = firstUser.attr('name');
+        file_permission_users.attr('selected_item', username);
+        grouped_permissions.attr('username', username);
+    }
+}, 50);
+
 perm_dialog.append(perm_add_user_select)
 perm_add_user_select.append(perm_remove_user_button) // Cheating a bit again - add the remove button the the 'add user select' div, just so it shows up on the same line.
+const perm_action_status = $('<span id="perm_action_status" class="perm-action-status" aria-live="polite"></span>');
+perm_add_user_select.append(perm_action_status);
+
+//TOGGLE
+const allowAllToggle = $('<button id="perm_allow_toggle" class="ui-button ui-widget ui-corner-all">Full Access</button>')
+// TOGGLE
+perm_dialog.append(allowAllToggle)
+
 perm_dialog.append(grouped_permissions)
 perm_dialog.append(perm_inherited_legend)
 
-perm_restore_inherited_div = $(`<div id="perm_restore_inherited_div" class="perm-restore-inherited-div">
+perm_restore_inherited_div = $(`
+    <div id="perm_restore_inherited_div" class="perm-restore-inherited-div">
     <input type="checkbox" id="perm_restore_inherited_checkbox" name="restore_inherited" />
     <label for="perm_restore_inherited_checkbox" id="perm_restore_inherited_label">Restore inherited permissions</label>
+    <span class="tooltip-wrapper">
+        <span class ="info-icon" id="restore_info_icon">?</span>
+        <span class="custom-tooltip-text">Removes custom permissions and reapplies inherited permissions from the parent folder. 
+        </span>
+    </span>
 </div>`)
+
+
+//TOGGLE
+$('#perm_allow_toggle').click(function() {
+
+    const allowCheckboxes = $('#permdialog_grouped_permissions input.perm_checkbox[ptype="allow"]')
+    const allChecked = allowCheckboxes.length > 0 &&
+        allowCheckboxes.filter(':checked').length === allowCheckboxes.length
+
+    allowCheckboxes.each(function() {
+        const checkbox = $(this)
+
+        if (checkbox.prop('disabled')) return
+
+        checkbox.prop('checked', !allChecked).trigger('change')
+    })
+
+    $(this).text(allChecked ? 'Full Access' : 'Clear Full Access')
+})
+
 
 perm_restore_inherited_div.find('#perm_restore_inherited_checkbox').on('change', function() {
     if(!$(this).prop('checked')) return
@@ -284,13 +420,32 @@ perm_restore_inherited_div.find('#perm_restore_inherited_checkbox').on('change',
 
 define_attribute_observer(grouped_permissions, 'username', updateRestoreInheritedAvailability)
 updateRestoreInheritedAvailability()
-// perm_dialog.append(advanced_expl_div) // COMMENTING THIS OUT GETS RID OF INSTRUCTIONS TO OPEN ADVANCED SETTINGS!!!
 
 // Sidebar: restore control (replaces the Advanced "include inheritable permissions" row here only; that checkbox stays in Advanced dialog)
 const inheritanceControls = $('<div id="perm_inheritance_controls" class="section"></div>');
 inheritanceControls.append(perm_restore_inherited_div);
+inheritanceControls.append($('#adv_perm_inheritance_div'));
 inheritanceControls.append($('#adv_perm_replace_child_div'));
 perm_dialog.append(inheritanceControls);
+
+function maybeOpenStartupInstructionDialog() {
+    if(startup_instruction_dialog.data('shownOnce')) return
+
+    let urlTag = new URLSearchParams(window.location.search).get('tag')
+    let scenarioTag = $('#scenario_context').data('tag')
+    if(urlTag || scenarioTag) {
+        startup_instruction_dialog.data('shownOnce', true)
+        startup_instruction_dialog.dialog('open')
+    }
+}
+
+$(function() {
+    maybeOpenStartupInstructionDialog()
+})
+
+window.addEventListener('load', function() {
+    maybeOpenStartupInstructionDialog()
+})
 
 // --- Additional logic for reloading contents when needed: ---
 //Define an observer which will propagate perm_dialog's filepath attribute to all the relevant elements, whenever it changes:
@@ -299,7 +454,9 @@ define_attribute_observer(perm_dialog, 'filepath', function(){
     $('#advdialog').attr('filepath', current_filepath)
 
     grouped_permissions.attr('filepath', current_filepath) // set filepath for permission checkboxes
-    $('#permdialog_objname_namespan').text(current_filepath || 'Select a file or folder') // set filepath for Object Name text
+    $('#permdialog_objname_namespan')
+        .text(current_filepath || '')
+        .toggleClass('permdialog_objname_namespan--empty', !current_filepath)
     $('#permdialog_subtitle').text(current_filepath ? 'Permissions shown for the selected item.' : 'Select a file or folder to inspect its permissions.')
     $('#perm-dialog-advanced-button').prop('disabled', !(current_filepath && current_filepath in path_to_file))
 
@@ -308,9 +465,20 @@ define_attribute_observer(perm_dialog, 'filepath', function(){
     grouped_permissions.attr('username', '') // since we are reloading the user list, reset the username in permission checkboxes
 
     if(current_filepath && current_filepath in path_to_file) {
-        file_users = get_file_users(path_to_file[current_filepath])
-        file_user_list = make_user_list('permdialog_file_user', file_users, add_attributes = true)
-        file_permission_users.append(file_user_list)
+        file_users = get_file_users(path_to_file[current_filepath]);
+        file_user_list = make_user_list('permdialog_file_user', file_users, add_attributes = true);
+        file_permission_users.append(file_user_list);
+        file_permission_users.selectable('refresh');
+
+        const firstUser = file_permission_users.find('.ui-selectee').first();
+        if (firstUser.length) {
+            file_permission_users.find('.ui-selectee').removeClass('ui-selected');
+            firstUser.addClass('ui-selected');
+
+            const username = firstUser.attr('name');
+            file_permission_users.attr('selected_item', username);
+            grouped_permissions.attr('username', username);
+        }
     }
     updateRestoreInheritedAvailability()
 })

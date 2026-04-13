@@ -13,8 +13,13 @@ function make_file_element(file_obj) {
             <h3 id="${file_hash}_header">
                 <span class="oi oi-folder" id="${file_hash}_icon"/> ${file_obj.filename} 
                 <button class="ui-button ui-widget ui-corner-all permbutton" path="${file_hash}" id="${file_hash}_permbutton"> 
-                    <span class="oi oi-lock-unlocked" id="${file_hash}_permicon"/> 
-                </button>
+                    <span class="fa fa-cog" id="${file_hash}_permicon"></span>                </button>
+                <span class="tooltip-wrapper">
+                    <span class="info-icon">?</span>
+                    <span class="custom-tooltip-text">
+                        Opens the permissions panel for this file or folder
+                    </span>
+                </span>
             </h3>
         </div>`)
 
@@ -33,9 +38,14 @@ function make_file_element(file_obj) {
         return $(`<div class='file'  id="${file_hash}_div">
             <span class="oi oi-file" id="${file_hash}_icon"/> ${file_obj.filename}
             <button class="ui-button ui-widget ui-corner-all permbutton" path="${file_hash}" id="${file_hash}_permbutton"> 
-                <span class="oi oi-lock-unlocked" id="${file_hash}_permicon"/> 
-            </button>
-        </div>`)
+                <span class="fa fa-cog" id="${file_hash}_permicon"></span>            </button>
+            <span class="tooltip-wrapper">
+            <span class="info-icon">?</span>
+            <span class="custom-tooltip-text">
+                Opens the permissions panel for this file or folder
+            </span>
+        </span>
+    </div>`)
     }
 }
 

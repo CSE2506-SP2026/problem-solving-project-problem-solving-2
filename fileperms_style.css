@@ -29,6 +29,29 @@
     margin-bottom: 12px;
 }
 
+.undo-redo-controls{
+    display: flex;
+    gap: 8px;
+}
+
+.undo-redo-controls button{
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 8px;
+    background: #027FFF;
+    color: white;
+    border: 1px solid #ccc;
+    cursor: pointer;
+
+    box-shadow: 0 4px 0 #027FFF;
+    transition: all 0.1s ease;
+}
+
+.undo-redo-controls button:active{
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #027FFF;
+}
+
 #permdialog_title {
     margin: 0 0 4px 0;
     font-size: 20px;
@@ -43,6 +66,39 @@
     word-break: break-word;
 }
 
+#permdialog_objname_label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #5a5a5a;
+}
+
+#permdialog_objname_namespan, #permdialog_grouped_permissions_header_username {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #fff4cc;
+    border: 1px solid #e2c86b;
+    color: #2d2d2d;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+#permdialog_objname_namespan.permdialog_objname_namespan--empty {
+    display: none;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    color: #666666;
+    font-size: 14px;
+    font-weight: 500;
+}
+
 #permdialog_file_user_list {
     background: #ffffff;
 }
@@ -51,22 +107,19 @@
     background: #ffffff;
 }
 
-/* Sidebar: inherited permission checkboxes appear visually subdued */
 .perm-inherited-backing {
     opacity: 0.45;
     accent-color: #9a9a9a;
 }
 
-/* Inherited value still present but overridden by an explicit entry on this object */
 .perm-inherited-override-faded.perm-inherited-backing {
     opacity: 0.2;
     accent-color: #c8c8c8;
 }
 
-/* Keep inherited styling when disabled (override only via opposite column) */
 .perm_checkbox.perm-inherited-backing:disabled {
     opacity: 0.45;
-    cursor: default !important; /* override UA “not-allowed” on disabled controls */
+    cursor: default !important;
 }
 
 .perm_checkbox.perm-inherited-backing.perm-inherited-override-faded:disabled {
@@ -79,28 +132,6 @@
     line-height: 1.4;
     color: #333333;
     margin-top: 4px;
-}
-
-/* Match Advanced permission-tab checkbox rows */
-#perm_inheritance_controls .perm-restore-inherited-div {
-    margin-top: 0;
-}
-
-#perm_inheritance_controls #adv_perm_replace_child_div {
-    margin-top: 6px;
-}
-
-#perm_inheritance_controls .perm-restore-inherited-div label,
-#perm_inheritance_controls #adv_perm_replace_child_permissions_label {
-    font-size: 14px;
-    font-weight: normal;
-    vertical-align: middle;
-}
-
-#perm_inheritance_controls .perm-restore-inherited-div input[type="checkbox"],
-#perm_inheritance_controls #adv_perm_replace_child_permissions {
-    vertical-align: middle;
-    margin-right: 4px;
 }
 
 #perm_inheritance_controls:has(#perm_restore_inherited_checkbox:disabled) #perm_restore_inherited_label {
@@ -121,6 +152,84 @@
     position: fixed;
     bottom: 0;
     right: 0;
+}
+
+.tutorial_perm_icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #c9c9c9;
+    border-radius: 6px;
+    background: #f7f7f7;
+    color: #444444;
+    font-size: 14px;
+}
+
+.tutorial_user_icon,
+.sidebar_user_icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #444444;
+}
+
+.tutorial_user_icon {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #c9c9c9;
+    border-radius: 6px;
+    background: #f7f7f7;
+    font-size: 14px;
+}
+
+#permissions_user_title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar_user_icon {
+    font-size: 16px;
+}
+
+.tutorial_decision_icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+}
+
+.tutorial_decision_icon__allow,
+.tutorial_decision_icon__deny,
+.permission-action-label__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tutorial_decision_icon__allow,
+.permission-action-label--allow .permission-action-label__icon {
+    background: #e6f6ea;
+    color: #1b6e31;
+}
+
+.tutorial_decision_icon__deny,
+.permission-action-label--deny .permission-action-label__icon {
+    background: #fdeaea;
+    color: #a12626;
+}
+
+.permission-action-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 
@@ -158,4 +267,123 @@
     .persistent-permissions-panel {
         min-height: auto;
     }
+}
+
+
+
+.info-icon{
+    display: inline-flex;
+    align-items:center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    margin-left: 4px;
+    border-radius: 50%;
+    background-color: #cfcfcf;
+    color: #333333;
+    font-weight: bold;
+    font-size: 11px;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.info-icon:hover{
+    background-color: #bdbdbd;
+}
+
+/* .perm-restore-inherited-div{
+    position: relative;
+} */
+
+.custom-tooltip-text{
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1c1c1c;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.3;
+    white-space: normal;
+    width: 240px;
+    z-index: 9999;
+    transition: opacity 0.1s ease;
+    pointer-events: none;
+}
+
+.info-icon:hover + .custom-tooltip-text{
+    visibility: visible;
+    opacity: 1;
+
+}
+th {
+    position: relative;
+}
+
+/* #permdialog_objname{
+    position: relative;
+}
+
+#permdialog_objname .custom-tooltip-text{
+    left: 120px;
+}
+
+#perm_restore_inherited_div .custom-tooltip-text{
+    left: 220px;
+} */
+
+/* .custom-tooltip-text{
+    left: calc(100% + 10px);  
+} */
+
+.tooltip-wrapper{
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 6px;
+}
+
+th[id$="_header_allow"] .custom-tooltip-text,
+th[id$="_header_deny"] .custom-tooltip-text{
+    right: calc(100% + 10px);
+    left: auto;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.perm-group-header td {
+    background: #f3f5f7;
+    color: #4a4a4a;
+    font-weight: 600;
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 6px 8px;
+    border-top: 1px solid #d9d9d9;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+#permdialog_file_user_list .ui-widget-content.ui-selected {
+    background-color: #007fff !important;
+    color: white !important;
+}
+
+#permdialog_file_user_list .ui-widget-content.ui-selected span {
+    color: white !important;
+}
+
+#perm_allow_toggle {
+    background-color: #027FFF;
+    color: white;
+    border: none;
+    font-weight: 600;
+    margin: 8px 0;
+}
+
+#perm_allow_toggle:hover {
+    background-color: #0166d6;
 }
