@@ -230,7 +230,7 @@ function showStatus(message) {
     el.text(message).addClass('permdialog-status--active')
     setTimeout(() => {
         el.text('').removeClass('permdialog-status--active')
-    }, 1800)
+    }, 1200)
 }
 
 // Make button to add a new user to the list:
@@ -337,10 +337,33 @@ perm_remove_user_button.click(function(){
 perm_dialog.append(obj_name_div)
 perm_dialog.append($('<div id="permissions_user_title"><span class="sidebar_user_icon" aria-hidden="true"><span class="oi oi-person"></span></span><span>Select user from below:</span></div>'))
 perm_dialog.append(file_permission_users)
+
+//auto-click 
+setTimeout(() => {
+    file_permission_users.selectable('refresh');
+
+    const firstUser = $('#permdialog_file_user_list .ui-selectee').first();
+
+    if (firstUser.length) {
+        $('#permdialog_file_user_list .ui-selectee').removeClass('ui-selected');
+        firstUser.addClass('ui-selected');
+
+        const username = firstUser.attr('name');
+        file_permission_users.attr('selected_item', username);
+        grouped_permissions.attr('username', username);
+    }
+}, 50);
+
 perm_dialog.append(perm_add_user_select)
 perm_add_user_select.append(perm_remove_user_button) // Cheating a bit again - add the remove button the the 'add user select' div, just so it shows up on the same line.
 const perm_action_status = $('<span id="perm_action_status" class="perm-action-status" aria-live="polite"></span>');
 perm_add_user_select.append(perm_action_status);
+
+//TOGGLE
+const allowAllToggle = $('<button id="perm_allow_toggle" class="ui-button ui-widget ui-corner-all">Full Access</button>')
+// TOGGLE
+perm_dialog.append(allowAllToggle)
+
 perm_dialog.append(grouped_permissions)
 perm_dialog.append(perm_inherited_legend)
 
@@ -354,6 +377,26 @@ perm_restore_inherited_div = $(`
         </span>
     </span>
 </div>`)
+
+
+//TOGGLE
+$('#perm_allow_toggle').click(function() {
+
+    const allowCheckboxes = $('#permdialog_grouped_permissions input.perm_checkbox[ptype="allow"]')
+    const allChecked = allowCheckboxes.length > 0 &&
+        allowCheckboxes.filter(':checked').length === allowCheckboxes.length
+
+    allowCheckboxes.each(function() {
+        const checkbox = $(this)
+
+        if (checkbox.prop('disabled')) return
+
+        checkbox.prop('checked', !allChecked).trigger('change')
+    })
+
+    $(this).text(allChecked ? 'Full Access' : 'Clear Full Access')
+})
+
 
 perm_restore_inherited_div.find('#perm_restore_inherited_checkbox').on('change', function() {
     if(!$(this).prop('checked')) return
@@ -422,9 +465,20 @@ define_attribute_observer(perm_dialog, 'filepath', function(){
     grouped_permissions.attr('username', '') // since we are reloading the user list, reset the username in permission checkboxes
 
     if(current_filepath && current_filepath in path_to_file) {
-        file_users = get_file_users(path_to_file[current_filepath])
-        file_user_list = make_user_list('permdialog_file_user', file_users, add_attributes = true)
-        file_permission_users.append(file_user_list)
+        file_users = get_file_users(path_to_file[current_filepath]);
+        file_user_list = make_user_list('permdialog_file_user', file_users, add_attributes = true);
+        file_permission_users.append(file_user_list);
+        file_permission_users.selectable('refresh');
+
+        const firstUser = file_permission_users.find('.ui-selectee').first();
+        if (firstUser.length) {
+            file_permission_users.find('.ui-selectee').removeClass('ui-selected');
+            firstUser.addClass('ui-selected');
+
+            const username = firstUser.attr('name');
+            file_permission_users.attr('selected_item', username);
+            grouped_permissions.attr('username', username);
+        }
     }
     updateRestoreInheritedAvailability()
 })

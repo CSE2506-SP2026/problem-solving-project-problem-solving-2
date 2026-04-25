@@ -354,3 +354,36 @@ th[id$="_header_deny"] .custom-tooltip-text{
     top: 50%;
     transform: translateY(-50%);
 }
+
+.perm-group-header td {
+    background: #f3f5f7;
+    color: #4a4a4a;
+    font-weight: 600;
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 6px 8px;
+    border-top: 1px solid #d9d9d9;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+#permdialog_file_user_list .ui-widget-content.ui-selected {
+    background-color: #007fff !important;
+    color: white !important;
+}
+
+#permdialog_file_user_list .ui-widget-content.ui-selected span {
+    color: white !important;
+}
+
+#perm_allow_toggle {
+    background-color: #027FFF;
+    color: white;
+    border: none;
+    font-weight: 600;
+    margin: 8px 0;
+}
+
+#perm_allow_toggle:hover {
+    background-color: #0166d6;
+}
