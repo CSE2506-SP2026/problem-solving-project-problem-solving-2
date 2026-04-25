@@ -67,13 +67,12 @@ $('.folder').accordion({
 
 // open permissions dialog when a permission button is clicked
 $('.permbutton').click( function( e ) {
-    // Set the path in the persistent permissions sidebar:
     let path = e.currentTarget.getAttribute('path');
     perm_dialog.attr('filepath', path)
 
-    // Deal with the fact that folders try to collapse/expand when you click on their permissions button:
-    e.stopPropagation() // don't propagate button click to element underneath it (e.g. folder accordion)
-    // Emit a click for logging purposes:
+    $('.permbutton').removeClass('permbutton--active');
+    $(e.currentTarget).addClass('permbutton--active');
+    e.stopPropagation() 
     emitter.dispatchEvent(new CustomEvent('userEvent', { detail: new ClickEntry(ActionEnum.CLICK, (e.clientX + window.pageXOffset), (e.clientY + window.pageYOffset), e.target.id,new Date().getTime()) }))
 });
 

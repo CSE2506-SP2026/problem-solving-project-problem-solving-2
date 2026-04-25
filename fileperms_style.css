@@ -144,8 +144,37 @@
 }
 
 .ui-selected {
-    background: #007fff;
-    color: white;
+    background: transparent;
+    color: inherit;
+}
+
+
+.folder > .ui-accordion-header.ui-state-active,
+.folder > .ui-accordion-header.ui-state-focus,
+.folder > .ui-accordion-header.ui-state-hover,
+.folder > .ui-accordion-header.ui-state-default {
+    background: transparent;
+    border-color: #d9d9d9;
+    color: inherit;
+}
+
+
+.permbutton.permbutton--active,
+.permbutton.permbutton--active.ui-button.ui-widget {
+    background: #027FFF;
+    border-color: #0166d6;
+    color: #ffffff;
+}
+
+.permbutton.permbutton--active .fa-cog {
+    color: #ffffff;
+}
+
+.permbutton.permbutton--active:hover,
+.permbutton.permbutton--active.ui-button.ui-widget:hover {
+    background: #0166d6;
+    border-color: #0156b3;
+    color: #ffffff;
 }
 
 .footer {
@@ -368,7 +397,8 @@ th[id$="_header_deny"] .custom-tooltip-text{
 }
 
 #permdialog_file_user_list .ui-widget-content.ui-selected {
-    background-color: #007fff !important;
+    /* background-color: #007fff !important; */
+    background-color: white !important;
     color: white !important;
 }
 
