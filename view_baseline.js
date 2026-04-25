@@ -194,7 +194,7 @@ function updateRestoreInheritedAvailability() {
 perm_inherited_legend = $(`<div id="permdialog_inherited_key" class="perm-inherited-key section" role="note">
     <span class="perm-inherited-key__text">*Gray checks indicate inherited permissions.</span>
     <br>
-    <span class="perm-inherited-key__header" style="text-decoration: underline; font-weight: bold;">
+    <span class="perm-inherited-key__header" style="text-decoration: underline; font-weight: bold; font-size: 20px;">
         To Push/Refresh Inheritance:
     </span>
 </div>`)
