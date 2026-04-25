@@ -333,16 +333,54 @@ function define_permission_checkboxes(
     `);
     
     // START MARCUS ADDED
-    let fullAccessRow = $(`
+    /* let fullAccessRow = $(`
         <tr id="${id_prefix}_fullaccess_row">
             <td colspan="3" style="text-align:left;">
                 <button id="${id_prefix}_fullaccess_button" class="ui-button ui-widget ui-corner-all">Allow All</button>
             </td>
         </tr>
+    `); */
+
+    let fullAccessRow = $(`
+        <tr id="${id_prefix}_fullaccess_row" class="perm-fullaccess-row">
+            <td colspan="3">
+                <button class="ui-button ui-widget ui-corner-all perm-fullaccess-button" id="${id_prefix}_allow_all_button">Allow All</button>
+                <button class="ui-button ui-widget ui-corner-all perm-fullaccess-button" id="${id_prefix}_deny_all_button">Deny All</button>
+            </td>
+        </tr>
     `);
     perm_table.append(fullAccessRow);
 
-    perm_table.on("click", `#${id_prefix}_fullaccess_button`, function () {
+    function toggleColumn(perm_table, type) {
+      const checkboxes = perm_table.find(
+        `input.perm_checkbox[ptype="${type}"]`,
+      );
+
+      const allChecked =
+        checkboxes.length > 0 &&
+        checkboxes.filter(":checked").length === checkboxes.length;
+
+      checkboxes.each(function () {
+        const cb = $(this);
+        if (cb.prop("disabled")) return;
+
+        cb.prop("checked", !allChecked).trigger("change");
+      });
+
+      return allChecked;
+    }
+
+    perm_table.on("click", `#${id_prefix}_allow_all_button`, function () {
+      const allChecked = toggleColumn(perm_table, "allow");
+      $(this).text(allChecked ? "Allow All" : "Clear Allow");
+    });
+
+    perm_table.on("click", `#${id_prefix}_deny_all_button`, function () {
+      const allChecked = toggleColumn(perm_table, "deny");
+      $(this).text(allChecked ? "Deny All" : "Clear Deny");
+    });
+
+    /* perm_table.on("click", `#${id_prefix}_fullaccess_button`, function () {
       const allowCheckboxes = perm_table.find(
         'input.perm_checkbox[ptype="allow"]',
       );
@@ -360,7 +398,7 @@ function define_permission_checkboxes(
       });
 
       $(this).text(allChecked ? "Allow All" : "Clear Allow");
-    });
+    }); */
     // END MARCUS ADDED
 
     // !!! OLD HELPER FUNCTION THAT I HAD TO CHANGE TO MANUALLY REORDER AND ADD HEADERS
