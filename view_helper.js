@@ -342,51 +342,33 @@ function define_permission_checkboxes(
     `);
     perm_table.append(fullAccessRow);
 
-    function syncBulkButtonLabels(perm_table) {
-      const allowEnabled = perm_table.find(
-        `input.perm_checkbox[ptype="allow"]:not(:disabled)`,
-      );
-      const denyEnabled = perm_table.find(
-        `input.perm_checkbox[ptype="deny"]:not(:disabled)`,
-      );
-
-      const allowAllChecked =
-        allowEnabled.length > 0 &&
-        allowEnabled.filter(":checked").length === allowEnabled.length;
-      const denyAllChecked =
-        denyEnabled.length > 0 &&
-        denyEnabled.filter(":checked").length === denyEnabled.length;
-
-      perm_table
-        .find(`#${id_prefix}_allow_all_button`)
-        .text(allowAllChecked ? "Clear Allow" : "Allow All");
-      perm_table
-        .find(`#${id_prefix}_deny_all_button`)
-        .text(denyAllChecked ? "Clear Deny" : "Deny All");
-    }
-
     function toggleColumn(perm_table, type) {
-      const actionable = perm_table.find(
-        `input.perm_checkbox[ptype="${type}"]:not(:disabled)`,
+      const checkboxes = perm_table.find(
+        `input.perm_checkbox[ptype="${type}"]`,
       );
 
       const allChecked =
-        actionable.length > 0 &&
-        actionable.filter(":checked").length === actionable.length;
+        checkboxes.length > 0 &&
+        checkboxes.filter(":checked").length === checkboxes.length;
 
-      actionable.each(function () {
-        $(this).prop("checked", !allChecked).trigger("change");
+      checkboxes.each(function () {
+        const cb = $(this);
+        if (cb.prop("disabled")) return;
+
+        cb.prop("checked", !allChecked).trigger("change");
       });
+
+      return allChecked;
     }
 
     perm_table.on("click", `#${id_prefix}_allow_all_button`, function () {
-      toggleColumn(perm_table, "allow");
-      syncBulkButtonLabels(perm_table);
+      const allChecked = toggleColumn(perm_table, "allow");
+      $(this).text(allChecked ? "Allow All" : "Clear Allow");
     });
 
     perm_table.on("click", `#${id_prefix}_deny_all_button`, function () {
-      toggleColumn(perm_table, "deny");
-      syncBulkButtonLabels(perm_table);
+      const allChecked = toggleColumn(perm_table, "deny");
+      $(this).text(allChecked ? "Deny All" : "Clear Deny");
     });
 
     // !!! OLD HELPER FUNCTION THAT I HAD TO CHANGE TO MANUALLY REORDER AND ADD HEADERS
@@ -572,7 +554,6 @@ function define_permission_checkboxes(
         let $cb = $(this);
         $cb.prop("disabled", $cb.hasClass("perm-inherited-backing"));
       });
-      syncBulkButtonLabels(perm_table);
     } else {
       perm_table.find(".perm_checkbox").prop("disabled", true);
       perm_table.find(".perm_checkbox").prop("checked", false);
@@ -580,7 +561,6 @@ function define_permission_checkboxes(
         .find(".perm_checkbox")
         .removeClass("perm-inherited-backing perm-inherited-override-faded");
       $(`#${id_prefix}_header_username`).text("");
-      syncBulkButtonLabels(perm_table);
     }
   };
 
@@ -698,7 +678,6 @@ function define_permission_checkboxes(
 
     toggle_permission(filepath, username, permission, ptype, newChecked);
     update_perm_table();
-    syncBulkButtonLabels(perm_table);
   });
 
   perm_table.data("refreshPermTable", update_perm_table);
