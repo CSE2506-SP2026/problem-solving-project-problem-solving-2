@@ -194,6 +194,18 @@ const instruction_toggle_btn = $(`
 `)
 $('body').append(instruction_toggle_btn)
 
+function syncInstructionTogglePosition() {
+    const isQuestionPanelOpen = $('#mturk-top-banner-drop-down-content').is(':visible')
+    $('body').toggleClass('question-panel-open', isQuestionPanelOpen)
+}
+
+$('#mturk-top-banner-arrow').on('click', function() {
+    // run after banner toggle handler updates visibility
+    setTimeout(syncInstructionTogglePosition, 0)
+})
+
+syncInstructionTogglePosition()
+
 // collapse
 $('#instruction_close_btn').click(function() {
     $('#startup_instruction_panel').addClass('collapsed')

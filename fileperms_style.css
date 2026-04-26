@@ -412,6 +412,10 @@
     display: block;
 }
 
+body.question-panel-open #instruction_toggle_btn {
+    bottom: 300px;
+}
+
 #permdialog_file_user_list.permdialog_user_list--disabled {
     opacity: 0.45;
     filter: grayscale(0.2);
