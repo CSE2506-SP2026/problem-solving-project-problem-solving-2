@@ -579,3 +579,112 @@ th[id$="_header_deny"] .custom-tooltip-text{
 .perm-fullaccess-button:hover {
     background-color: #0166d6;
 }
+
+/* --- PERMISSION CONTROLS HEADER --- */
+#permdialog_inherited_key {
+    margin-top: 12px;
+    margin-bottom: 14px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background-color: #fafafa;
+    border: 1px solid #ddd;
+}
+
+.perm-inherited-key__text {
+    font-size: 13px;
+    color: #666;
+}
+
+.perm-inherited-key__header {
+    display: block;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    font-size: 20px !important;
+    font-weight: bold;
+    text-decoration: none !important;
+    color: #333;
+}
+
+.perm-subtext {
+    font-size: 13px;
+    color: #666;
+    margin: 4px 0 0 0;
+}
+
+
+/* PERMISSION CONTROL SECTION */
+#perm_restore_inherited_div,
+#adv_perm_inheritance_div,
+#adv_perm_replace_child_div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin: 8px 0;
+    padding: 10px 12px;
+
+    border-radius: 8px;
+    border: 1px solid #4a90e2;
+    background-color: #eef5ff;
+
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#perm_restore_inherited_checkbox,
+#adv_perm_inheritance,
+#adv_perm_replace_child_permissions {
+    transform: scale(1.15);
+    cursor: pointer;
+    margin: 0;
+}
+
+#perm_restore_inherited_checkbox:focus,
+#adv_perm_inheritance:focus,
+#adv_perm_replace_child_permissions:focus {
+    outline: none;
+}
+
+#perm_restore_inherited_label,
+#adv_perm_inheritance_label,
+#adv_perm_replace_child_permissions_label {
+    font-weight: 600;
+    color: #111;
+    cursor: pointer;
+}
+
+#perm_restore_inherited_div:has(input:disabled),
+#perm_restore_inherited_div.disabled {
+    opacity: 0.55;
+    border-color: #ccc;
+    background-color: #f3f3f3;
+}
+
+
+#perm_restore_inherited_div,
+#adv_perm_inheritance_div,
+#adv_perm_replace_child_div {
+    border: 1px solid #ddd;
+    background-color: #ffffff;
+}
+
+#perm_restore_inherited_div:hover,
+#adv_perm_inheritance_div:hover,
+#adv_perm_replace_child_div:hover {
+    border: 1px solid #4a90e2;
+    background-color: #eef5ff;
+}
+.perm-hint {
+    margin-left: 12px;
+    padding: 6px 10px;
+
+    background-color: #fff4cc; /* soft yellow */
+    border: 1px solid #f2d27a;
+    border-radius: 6px;
+
+    font-size: 15px;
+    text-align: center;
+    color: #6b5b00;
+    font-weight: 500;
+
+    display: inline-block;
+}

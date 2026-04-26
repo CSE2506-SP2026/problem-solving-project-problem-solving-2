@@ -131,12 +131,15 @@
                             <button id="adv_perm_edit" class="ui-button ui-widget ui-corner-all">Edit...</button>
                             <div id="adv_perm_inheritance_div">
                                 <input type="checkbox" id="adv_perm_inheritance" name="inherit">
-                                <label for="adv_perm_inheritance" id="adv_perm_inheritance_label">Override Inheritable Permissions</label>
+                                <label for="adv_perm_inheritance" id="adv_perm_inheritance_label">Override Inherited Permissions (Make Editable)</label>
+                                <span class="perm-hint">
+                                        Note: Required to change gray (inherited) permissions.
+                                </span>
                             </div>
                             <div id="adv_perm_replace_child_div">
                                 <input type="checkbox" id="adv_perm_replace_child_permissions" name="replace_child">
                                 <label for="adv_perm_replace_child_permissions"
-                                    id="adv_perm_replace_child_permissions_label">Update Child Users with New Permissions</label>
+                                    id="adv_perm_replace_child_permissions_label">Apply New Permissions to Child Files/Folders</label>
                             </div>
                         </div>
                         <div id="adv_owner_tab">
