@@ -335,8 +335,8 @@ function define_permission_checkboxes(
     let fullAccessRow = $(`
         <tr id="${id_prefix}_fullaccess_row" class="perm-fullaccess-row">
             <td colspan="3">
-                <button class="ui-button ui-widget ui-corner-all perm-fullaccess-button" id="${id_prefix}_allow_all_button">Allow All</button>
-                <button class="ui-button ui-widget ui-corner-all perm-fullaccess-button" id="${id_prefix}_deny_all_button">Deny All</button>
+                <button class="ui-button ui-widget ui-corner-all perm-fullaccess-button" id="${id_prefix}_allow_all_button">Give Complete Access</button>
+                <button class="ui-button ui-widget ui-corner-all perm-fullaccess-button" id="${id_prefix}_deny_all_button">Set to Read Only</button>
             </td>
         </tr>
     `);
@@ -363,12 +363,58 @@ function define_permission_checkboxes(
 
     perm_table.on("click", `#${id_prefix}_allow_all_button`, function () {
       const allChecked = toggleColumn(perm_table, "allow");
-      $(this).text(allChecked ? "Allow All" : "Clear Allow");
+      $(this).text(allChecked ? "Give Complete Access" : "Clear Complete Access");
     });
 
     perm_table.on("click", `#${id_prefix}_deny_all_button`, function () {
-      const allChecked = toggleColumn(perm_table, "deny");
-      $(this).text(allChecked ? "Deny All" : "Clear Deny");
+      const filepath = perm_table.attr("filepath");
+      const username = perm_table.attr("username");
+      if (
+        !filepath ||
+        !username ||
+        !(filepath in path_to_file) ||
+        !(username in all_users)
+      )
+        return;
+
+      const readPerms = new Set(
+        permissionGroups.find((g) => g.title === "Read").perms,
+      );
+
+      const denyNonRead = Object.values(permissions).filter(
+        (p) => !readPerms.has(p),
+      );
+
+      // Are all non-read denies already checked?
+      const allNonReadDenied =
+        denyNonRead.length > 0 &&
+        denyNonRead.every((p) => {
+          const p_id = p.replace(/[ \\/]/g, "_");
+          const cb = perm_table.find(`#${id_prefix}_${p_id}_deny_checkbox`);
+          return cb.length && cb.prop("checked");
+        });
+
+      if (allNonReadDenied) {
+        // Clear read-only
+        for (const p of denyNonRead) {
+          toggle_permission(filepath, username, p, "deny", false);
+        }
+        $(this).text("Set to Read Only");
+      } else {
+        // Apply read-only
+        for (const p of Object.values(permissions)) {
+          if (readPerms.has(p)) {
+            toggle_permission(filepath, username, p, "deny", false);
+          } else {
+            toggle_permission(filepath, username, p, "deny", true);
+            toggle_permission(filepath, username, p, "allow", false); // optional but recommended
+          }
+        }
+        $(this).text("Clear Read Only");
+      }
+
+      const refresh = perm_table.data("refreshPermTable");
+      if (typeof refresh === "function") refresh();
     });
 
     // !!! OLD HELPER FUNCTION THAT I HAD TO CHANGE TO MANUALLY REORDER AND ADD HEADERS
