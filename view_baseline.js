@@ -21,6 +21,19 @@ perm_dialog = $(`
 `)
 $('#sidepanel').append(perm_dialog)
 
+function setSidepanelVisible(isVisible) {
+    if(isVisible) {
+        $('#sidepanel').removeClass('sidepanel--hidden').attr('aria-hidden', 'false')
+        $('#html-loc').removeClass('sidepanel-collapsed')
+        return
+    }
+
+    $('#sidepanel').addClass('sidepanel--hidden').attr('aria-hidden', 'true')
+    $('#html-loc').addClass('sidepanel-collapsed')
+}
+
+setSidepanelVisible(false)
+
 $('#perm-dialog-advanced-button').click(function() {
     let filepath = perm_dialog.attr('filepath')
     if(filepath && filepath.length > 0) {
@@ -121,61 +134,77 @@ restore_inherited_confirm_dialog.on('dialogclose', function() {
     restore_inherited_confirm_dialog.removeData('restoreUn')
 })
 
-startup_instruction_dialog = define_new_dialog('startup_instruction_dialog', 'How to use this interface', {
-    width: 560,
-    buttons: {
-        OK: {
-            text: 'OK',
-            id: 'startup-instruction-ok-button',
-            click: function() {
-                $( this ).dialog('close')
-            },
-        },
-    },
-})
-startup_instruction_dialog.html(`
-<div id="startup_instruction_text">
-  <h3>Change Permissions</h3>
+startup_instruction_panel = $(`
+<aside id="startup_instruction_panel" aria-label="How to use this interface">
+    <div class="instruction_header">
+        <h3>How to use</h3>
+        <button id="instruction_close_btn" aria-label="Collapse">×</button>
+    </div>
 
-  <div class="tutorial_step">
-    <span class="step_icon tutorial_perm_icon" aria-hidden="true"><span class="fa fa-cog"></span></span>
-    <span class="step_text"><strong>Select</strong> a file or folder by clicking the permissions button</span>
-  </div>
+    <div id="startup_instruction_text">
+        <div class="tutorial_step">
+    <span class="step_number">1</span>
+            <span class="step_icon tutorial_perm_icon" aria-hidden="true"><span class="fa fa-cog"></span></span>
+            <span class="step_text"><strong>Select</strong> a file or folder by clicking the permissions button</span>
+        </div>
 
-  <div class="tutorial_arrow">↓</div>
+        <div class="tutorial_arrow">↓</div>
 
-  <div class="tutorial_step">
-    <span class="step_icon tutorial_user_icon" aria-hidden="true"><span class="oi oi-person"></span></span>
-    <span class="step_text"><strong>Select</strong> a user or group</span>
-  </div>
+        <div class="tutorial_step">
+    <span class="step_number">2</span>
+            <span class="step_icon tutorial_user_icon" aria-hidden="true"><span class="oi oi-person"></span></span>
+            <span class="step_text"><strong>Select</strong> a user or group</span>
+        </div>
 
-  <div class="tutorial_arrow">↓</div>
+        <div class="tutorial_arrow">↓</div>
 
-  <div class="tutorial_step">
-    <span class="step_text">Not listed? <strong>Add them first</strong></span>
-  </div>
+        <div class="tutorial_step">
+    <span class="step_number">3</span>
+            <span class="step_text">Not listed? <strong>Add them first</strong></span>
+        </div>
 
-  <div class="tutorial_arrow">↓</div>
+        <div class="tutorial_arrow">↓</div>
 
-  <div class="tutorial_step">
-    <span class="step_text"><strong>Pick</strong> the permission to change</span>
-  </div>
+       <div class="tutorial_step">
+    <span class="step_number">4</span>
+            <span class="step_text"><strong>Pick</strong> the permission to change</span>
+        </div>
 
-  <div class="tutorial_arrow">↓</div>
+        <div class="tutorial_arrow">↓</div>
 
-  <div class="tutorial_step">
-    <span class="step_icon tutorial_decision_icon" aria-hidden="true">
-      <span class="tutorial_decision_icon__allow">✓</span>
-      <span class="tutorial_decision_icon__deny">✕</span>
-    </span>
-    <span class="step_text">Choose <strong>Allow</strong> or <strong>Deny</strong></span>
-  </div>
+        <div class="tutorial_step">
+    <span class="step_number">5</span>
+            <span class="step_icon tutorial_decision_icon" aria-hidden="true">
+                <span class="tutorial_decision_icon__allow">✓</span>
+                <span class="tutorial_decision_icon__deny">✕</span>
+            </span>
+            <span class="step_text">Choose <strong>Allow</strong> or <strong>Deny</strong></span>
+        </div>
 
-  <div class="tutorial_note">
-    <strong>?</strong> Hover over the help icon for permission details
-  </div>
-</div>
+        <div class="tutorial_note">
+            <strong>?</strong> Hover over the help icon for permission details
+        </div>
+    </div>
+</aside>
 `)
+$('body').append(startup_instruction_panel)
+
+const instruction_toggle_btn = $(`
+<button id="instruction_toggle_btn">?</button>
+`)
+$('body').append(instruction_toggle_btn)
+
+// collapse
+$('#instruction_close_btn').click(function() {
+    $('#startup_instruction_panel').addClass('collapsed')
+    $('#instruction_toggle_btn').addClass('visible')
+})
+
+// reopen
+$('#instruction_toggle_btn').click(function() {
+    $('#startup_instruction_panel').removeClass('collapsed')
+    $(this).removeClass('visible')
+})
 
 function updateRestoreInheritedAvailability() {
     let fp = perm_dialog.attr('filepath')
@@ -223,6 +252,20 @@ file_permission_users = define_single_select_list('permdialog_file_user_list', f
 file_permission_users.css({
     'height':'80px',
 })
+
+function setUserSelectionEnabled(isEnabled) {
+    if(isEnabled) {
+        file_permission_users.removeClass('permdialog_user_list--disabled').attr('aria-disabled', 'false')
+        file_permission_users.selectable('enable')
+        return
+    }
+
+    file_permission_users.unselect()
+    file_permission_users.attr('selected_item', '')
+    grouped_permissions.attr('username', '')
+    file_permission_users.addClass('permdialog_user_list--disabled').attr('aria-disabled', 'true')
+    file_permission_users.selectable('disable')
+}
 
 function showStatus(message) {
     const el = $('#perm_action_status')
@@ -337,6 +380,7 @@ perm_remove_user_button.click(function(){
 perm_dialog.append(obj_name_div)
 perm_dialog.append($('<div id="permissions_user_title"><span class="sidebar_user_icon" aria-hidden="true"><span class="oi oi-person"></span></span><span>Select user from below:</span></div>'))
 perm_dialog.append(file_permission_users)
+setUserSelectionEnabled(false)
 
 //auto-click 
 setTimeout(() => {
@@ -428,30 +472,13 @@ inheritanceControls.append($('#adv_perm_inheritance_div'));
 inheritanceControls.append($('#adv_perm_replace_child_div'));
 perm_dialog.append(inheritanceControls);
 
-function maybeOpenStartupInstructionDialog() {
-    if(startup_instruction_dialog.data('shownOnce')) return
-
-    let urlTag = new URLSearchParams(window.location.search).get('tag')
-    let scenarioTag = $('#scenario_context').data('tag')
-    if(urlTag || scenarioTag) {
-        startup_instruction_dialog.data('shownOnce', true)
-        startup_instruction_dialog.dialog('open')
-    }
-}
-
-$(function() {
-    maybeOpenStartupInstructionDialog()
-})
-
-window.addEventListener('load', function() {
-    maybeOpenStartupInstructionDialog()
-})
-
 // --- Additional logic for reloading contents when needed: ---
 //Define an observer which will propagate perm_dialog's filepath attribute to all the relevant elements, whenever it changes:
 define_attribute_observer(perm_dialog, 'filepath', function(){
     let current_filepath = perm_dialog.attr('filepath')
+    let hasValidSelection = !!(current_filepath && current_filepath in path_to_file)
     $('#advdialog').attr('filepath', current_filepath)
+    setSidepanelVisible(hasValidSelection)
 
     grouped_permissions.attr('filepath', current_filepath) // set filepath for permission checkboxes
     $('#permdialog_objname_namespan')
@@ -464,11 +491,12 @@ define_attribute_observer(perm_dialog, 'filepath', function(){
     file_permission_users.empty()
     grouped_permissions.attr('username', '') // since we are reloading the user list, reset the username in permission checkboxes
 
-    if(current_filepath && current_filepath in path_to_file) {
+    if(hasValidSelection) {
         file_users = get_file_users(path_to_file[current_filepath]);
         file_user_list = make_user_list('permdialog_file_user', file_users, add_attributes = true);
         file_permission_users.append(file_user_list);
         file_permission_users.selectable('refresh');
+        setUserSelectionEnabled(true)
 
         const firstUser = file_permission_users.find('.ui-selectee').first();
         if (firstUser.length) {
@@ -479,6 +507,8 @@ define_attribute_observer(perm_dialog, 'filepath', function(){
             file_permission_users.attr('selected_item', username);
             grouped_permissions.attr('username', username);
         }
+    } else {
+        setUserSelectionEnabled(false)
     }
     updateRestoreInheritedAvailability()
 })
