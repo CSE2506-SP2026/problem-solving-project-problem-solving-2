@@ -412,6 +412,10 @@
     display: block;
 }
 
+body.question-panel-open #instruction_toggle_btn {
+    bottom: 300px;
+}
+
 #permdialog_file_user_list.permdialog_user_list--disabled {
     opacity: 0.45;
     filter: grayscale(0.2);
@@ -559,12 +563,9 @@ th[id$="_header_deny"] .custom-tooltip-text{
     border-bottom: 1px solid #e6e6e6;
 }
 
-#permdialog_file_user_list .ui-widget-content.ui-selected {
+#permdialog_file_user_list .ui-widget-content.ui-selected,
+#user_select_list .ui-widget-content.ui-selected {
     background-color: #007fff !important;
-    color: white !important;
-}
-
-#permdialog_file_user_list .ui-widget-content.ui-selected span {
     color: white !important;
 }
 

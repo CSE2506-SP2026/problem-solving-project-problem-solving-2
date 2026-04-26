@@ -21,6 +21,69 @@ perm_dialog = $(`
 `)
 $('#sidepanel').append(perm_dialog)
 
+function refreshPermissionPanelsAfterHistoryChange() {
+    let prevFilepath = perm_dialog.attr('filepath') || ''
+    let prevUsername = (typeof file_permission_users !== 'undefined' && file_permission_users.attr)
+        ? (file_permission_users.attr('selected_item') || '')
+        : ''
+
+    if(prevFilepath.length > 0) {
+        perm_dialog.attr('filepath', '')
+        perm_dialog.attr('filepath', prevFilepath)
+
+        if(prevUsername.length > 0 && typeof file_permission_users !== 'undefined') {
+            let userElem = file_permission_users.find(`.ui-selectee[name="${prevUsername}"]`)
+            if(userElem.length) {
+                file_permission_users.find('.ui-selectee').removeClass('ui-selected')
+                userElem.addClass('ui-selected')
+                file_permission_users.attr('selected_item', prevUsername)
+                grouped_permissions.attr('username', prevUsername)
+            }
+        }
+    }
+
+    if(typeof grouped_permissions !== 'undefined' && grouped_permissions.data) {
+        let refresh = grouped_permissions.data('refreshPermTable')
+        if(typeof refresh === 'function') refresh()
+    }
+
+    if($('#advdialog').length && $('#advdialog').dialog('isOpen')) {
+        let advPath = $('#advdialog').attr('filepath')
+        if(advPath && advPath in path_to_file) {
+            open_advanced_dialog(advPath)
+        }
+    }
+
+    updateRestoreInheritedAvailability()
+}
+
+function updateUndoRedoButtons() {
+    $('#perm_undo_button').prop('disabled', !can_undo_permission_history())
+    $('#perm_redo_button').prop('disabled', !can_redo_permission_history())
+}
+
+$('#perm_undo_button').on('click', function() {
+    if(undo_permission_change()) {
+        showStatus('Undid last change')
+    }
+})
+
+$('#perm_redo_button').on('click', function() {
+    if(redo_permission_change()) {
+        showStatus('Redid last change')
+    }
+})
+
+emitter.addEventListener('permissionHistoryApplied', function() {
+    refreshPermissionPanelsAfterHistoryChange()
+})
+
+emitter.addEventListener('permissionHistoryChanged', function() {
+    updateUndoRedoButtons()
+})
+
+updateUndoRedoButtons()
+
 function setSidepanelVisible(isVisible) {
     if(isVisible) {
         $('#sidepanel').removeClass('sidepanel--hidden').attr('aria-hidden', 'false')
@@ -194,6 +257,18 @@ const instruction_toggle_btn = $(`
 `)
 $('body').append(instruction_toggle_btn)
 
+function syncInstructionTogglePosition() {
+    const isQuestionPanelOpen = $('#mturk-top-banner-drop-down-content').is(':visible')
+    $('body').toggleClass('question-panel-open', isQuestionPanelOpen)
+}
+
+$('#mturk-top-banner-arrow').on('click', function() {
+    // run after banner toggle handler updates visibility
+    setTimeout(syncInstructionTogglePosition, 0)
+})
+
+syncInstructionTogglePosition()
+
 // collapse
 $('#instruction_close_btn').click(function() {
     $('#startup_instruction_panel').addClass('collapsed')
@@ -217,6 +292,22 @@ function updateRestoreInheritedAvailability() {
     }
     let canRestore = user_has_inheritance_conflict_explicit_aces(path_to_file[fp], all_users[un])
     cb.prop('disabled', !canRestore)
+}
+
+function updateOverrideInheritedAvailability() {
+    let cb = $('#adv_perm_inheritance')
+    if(!cb.length) return
+
+    let fp = perm_dialog.attr('filepath')
+    if(!fp || !(fp in path_to_file)) {
+        cb.prop('disabled', true)
+        return
+    }
+
+    let file_obj = path_to_file[fp]
+    // Root objects have no parent to inherit from, so override is not applicable.
+    let canOverride = !!file_obj.parent
+    cb.prop('disabled', !canOverride)
 }
 
 // Gray check key
@@ -466,6 +557,7 @@ perm_restore_inherited_div.find('#perm_restore_inherited_checkbox').on('change',
 
 define_attribute_observer(grouped_permissions, 'username', updateRestoreInheritedAvailability)
 updateRestoreInheritedAvailability()
+updateOverrideInheritedAvailability()
 
 // Sidebar: restore control (replaces the Advanced "include inheritable permissions" row here only; that checkbox stays in Advanced dialog)
 const inheritanceControls = $('<div id="perm_inheritance_controls" class="section"></div>');
@@ -513,6 +605,7 @@ define_attribute_observer(perm_dialog, 'filepath', function(){
         setUserSelectionEnabled(false)
     }
     updateRestoreInheritedAvailability()
+    updateOverrideInheritedAvailability()
 })
 
 
@@ -575,12 +668,9 @@ function open_advanced_dialog(file_path) {
     $('#adv_owner_user_list').empty()
     $(`.effectivecheckcell`).empty()
 
-    if(file_obj.using_permission_inheritance) {
-        $('#adv_perm_inheritance').prop('checked', true)
-    }
-    else {
-        $('#adv_perm_inheritance').prop('checked', false)
-    }
+    // This checkbox means "Override inherited permissions" (checked => inheritance OFF / editable overrides ON)
+    $('#adv_perm_inheritance').prop('checked', !file_obj.using_permission_inheritance)
+    updateOverrideInheritedAvailability()
 
 
 
@@ -688,16 +778,18 @@ $("#adv_effective_user_select").click(function(event){
 // listen for changes to inheritance checkbox:
 $('#adv_perm_inheritance').change(function(){
     let filepath = $('#advdialog').attr('filepath')
-    let file_obj = path_to_file[filepath]
-    if( $('#adv_perm_inheritance').prop('checked')) {
-        // has just been turned on
-        file_obj.using_permission_inheritance = true
-        emitState()
-        open_advanced_dialog(filepath) // reload/reopen dialog
-        perm_dialog.attr('filepath', filepath) // force reload 'permissions' dialog
+    if(!filepath || !(filepath in path_to_file)) {
+        $('#adv_perm_inheritance').prop('checked', false)
+        return
     }
-    else {
-        // has just been turned off - pop up dialog with add/remove/cancel
+    let file_obj = path_to_file[filepath]
+    if(!file_obj.parent) {
+        $('#adv_perm_inheritance').prop('checked', false)
+        $(this).prop('disabled', true)
+        return
+    }
+    if( $('#adv_perm_inheritance').prop('checked')) {
+        // Override has just been turned on (inheritance OFF) - choose how to handle inherited ACEs
         $(`<div id="add_remove_cancel" title="Security">
             Warning: if you proceed, inheritable permissions will no longer propagate to this object.<br/>
             - Click Add to convert and add inherited parent permissions as explicit permissions on this object<br/>
@@ -718,6 +810,7 @@ $('#adv_perm_inheritance').change(function(){
                         convert_parent_permissions(file_obj)
                         open_advanced_dialog(filepath) // reload/reopen 'advanced' dialog
                         perm_dialog.attr('filepath', filepath) // force reload 'permissions' dialog
+                        updateOverrideInheritedAvailability()
                         $( this ).dialog( "close" );
                     },
                 },
@@ -731,6 +824,7 @@ $('#adv_perm_inheritance').change(function(){
                         emitState()
                         open_advanced_dialog(filepath) // reload/reopen 'advanced' dialog
                         perm_dialog.attr('filepath', filepath) // force reload 'permissions' dialog
+                        updateOverrideInheritedAvailability()
                         $( this ).dialog( "close" );
                     },
                 },
@@ -738,12 +832,21 @@ $('#adv_perm_inheritance').change(function(){
                     text: "Cancel",
                     id: "adv-inheritance-cancel-button",
                     click: function() {
-                        $('#adv_perm_inheritance').prop('checked', true) // undo unchecking
+                        $('#adv_perm_inheritance').prop('checked', false) // undo checking
+                        updateOverrideInheritedAvailability()
                         $( this ).dialog( "close" );
                     },
                 },
             }
         })
+    }
+    else {
+        // Override has been turned off (inheritance ON)
+        file_obj.using_permission_inheritance = true
+        emitState()
+        open_advanced_dialog(filepath) // reload/reopen dialog
+        perm_dialog.attr('filepath', filepath) // force reload 'permissions' dialog
+        updateOverrideInheritedAvailability()
     }
 })
 

@@ -171,6 +171,7 @@ function recompute_file_structure(display_files) {
     log_file_user_ids();
 }
 recompute_file_structure(files);
+record_permission_history_snapshot(true);
 
 // get the users with ACEs for a given file object.
 // recursively follow inheritance if appropriate; following_inheritance flag indicates that this user has at least some inherited permissions.
