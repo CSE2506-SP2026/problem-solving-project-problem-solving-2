@@ -674,15 +674,14 @@ th[id$="_header_deny"] .custom-tooltip-text{
     background-color: #eef5ff;
 }
 .perm-hint {
-    margin-left: 12px;
+    
     padding: 6px 10px;
 
-    background-color: #fff4cc; /* soft yellow */
+    background-color: #fff4cc; 
     border: 1px solid #f2d27a;
     border-radius: 6px;
 
     font-size: 15px;
-    text-align: center;
     color: #6b5b00;
     font-weight: 500;
 

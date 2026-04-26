@@ -221,13 +221,13 @@ function updateRestoreInheritedAvailability() {
 
 // Gray check key
 perm_inherited_legend = $(`<div id="permdialog_inherited_key" class="perm-inherited-key section" role="note">
-    <span class="perm-inherited-key__text">*Gray checks indicate inherited permissions.</span>
-    <br>
+    <span class="perm-hint">
+        Note: Required to change gray (inherited) permissions.
+    </span>
+
     <span class="perm-inherited-key__header" style="text-decoration: underline; font-weight: bold; font-size: 20px;">
         PERMISSION CONTROLS:
     </span>
-        <p class="perm-subtext">Manage how permissions are applied to this file and its contents.</p>
-    </div>
 </div>`)
 
 
@@ -416,7 +416,7 @@ perm_dialog.append(perm_inherited_legend)
 perm_restore_inherited_div = $(`
     <div id="perm_restore_inherited_div" class="perm-restore-inherited-div">
     <input type="checkbox" id="perm_restore_inherited_checkbox" name="restore_inherited" />
-    <label for="perm_restore_inherited_checkbox" id="perm_restore_inherited_label">Restore Inherited Permissions</label>
+    <label for="perm_restore_inherited_checkbox" id="perm_restore_inherited_label">Restore inherited permissions</label>
     <span class="tooltip-wrapper">
         <span class ="info-icon" id="restore_info_icon">?</span>
         <span class="custom-tooltip-text">Removes custom permissions and reapplies inherited permissions from the parent folder. 
