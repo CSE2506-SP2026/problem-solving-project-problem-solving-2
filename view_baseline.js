@@ -313,7 +313,7 @@ function updateOverrideInheritedAvailability() {
 // Gray check key
 perm_inherited_legend = $(`<div id="permdialog_inherited_key" class="perm-inherited-key section" role="note">
     <span class="perm-hint">
-        Note: Required to change gray (inherited) permissions.
+        Note: Gray checkbox = inherited permission.
     </span>
 
     <span class="perm-inherited-key__header" style="text-decoration: underline; font-weight: bold; font-size: 20px;">

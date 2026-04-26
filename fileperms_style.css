@@ -585,10 +585,10 @@ th[id$="_header_deny"] .custom-tooltip-text{
 #permdialog_inherited_key {
     margin-top: 12px;
     margin-bottom: 14px;
-    padding: 14px 16px;
+    /* padding: 14px 16px; */
     border-radius: 10px;
     background-color: #fafafa;
-    border: 1px solid #ddd;
+    /* border: 1px solid #ddd; */
 }
 
 .perm-inherited-key__text {
