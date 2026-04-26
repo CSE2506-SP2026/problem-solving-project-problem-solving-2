@@ -554,6 +554,13 @@ perm_dialog.append(inheritanceControls);
 define_attribute_observer(perm_dialog, 'filepath', function(){
     let current_filepath = perm_dialog.attr('filepath')
     let hasValidSelection = !!(current_filepath && current_filepath in path_to_file)
+
+    if (hasValidSelection) {
+        $('#adv_perm_inheritance').prop('checked', !!path_to_file[current_filepath].using_permission_inheritance);
+    } else {
+        $('#adv_perm_inheritance').prop('checked', false);
+    }
+
     $('#advdialog').attr('filepath', current_filepath)
     setSidepanelVisible(hasValidSelection)
 
@@ -768,8 +775,11 @@ $('#adv_perm_inheritance').change(function(){
         // has just been turned on
         file_obj.using_permission_inheritance = true
         emitState()
-        open_advanced_dialog(filepath) // reload/reopen dialog
-        perm_dialog.attr('filepath', filepath) // force reload 'permissions' dialog
+/*         open_advanced_dialog(filepath) // reload/reopen dialog
+        perm_dialog.attr('filepath', filepath) // force reload 'permissions' dialog */
+        let refresh = grouped_permissions.data("refreshPermTable");
+        if (typeof refresh === "function") refresh();
+        updateRestoreInheritedAvailability();
     }
     else {
         // has just been turned off - pop up dialog with add/remove/cancel
@@ -791,8 +801,11 @@ $('#adv_perm_inheritance').change(function(){
                         let filepath = $('#advdialog').attr('filepath')
                         let file_obj = path_to_file[filepath]
                         convert_parent_permissions(file_obj)
-                        open_advanced_dialog(filepath) // reload/reopen 'advanced' dialog
-                        perm_dialog.attr('filepath', filepath) // force reload 'permissions' dialog
+                        /* open_advanced_dialog(filepath) // reload/reopen 'advanced' dialog
+                        perm_dialog.attr('filepath', filepath) // force reload 'permissions' dialog */
+                        let refresh = grouped_permissions.data("refreshPermTable");
+                        if (typeof refresh === "function") refresh();
+                        updateRestoreInheritedAvailability();
                         $( this ).dialog( "close" );
                     },
                 },
@@ -804,8 +817,11 @@ $('#adv_perm_inheritance').change(function(){
                         let file_obj = path_to_file[filepath]
                         file_obj.using_permission_inheritance = false
                         emitState()
-                        open_advanced_dialog(filepath) // reload/reopen 'advanced' dialog
-                        perm_dialog.attr('filepath', filepath) // force reload 'permissions' dialog
+                        /* open_advanced_dialog(filepath) // reload/reopen 'advanced' dialog
+                        perm_dialog.attr('filepath', filepath) // force reload 'permissions' dialog */
+                        let refresh = grouped_permissions.data("refreshPermTable");
+                        if (typeof refresh === "function") refresh();
+                        updateRestoreInheritedAvailability();
                         $( this ).dialog( "close" );
                     },
                 },
