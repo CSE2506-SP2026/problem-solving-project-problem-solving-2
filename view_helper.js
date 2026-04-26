@@ -331,15 +331,6 @@ function define_permission_checkboxes(
         </tr>
     </table>
     `);
-    
-    // START MARCUS ADDED
-    /* let fullAccessRow = $(`
-        <tr id="${id_prefix}_fullaccess_row">
-            <td colspan="3" style="text-align:left;">
-                <button id="${id_prefix}_fullaccess_button" class="ui-button ui-widget ui-corner-all">Allow All</button>
-            </td>
-        </tr>
-    `); */
 
     let fullAccessRow = $(`
         <tr id="${id_prefix}_fullaccess_row" class="perm-fullaccess-row">
@@ -379,27 +370,6 @@ function define_permission_checkboxes(
       const allChecked = toggleColumn(perm_table, "deny");
       $(this).text(allChecked ? "Deny All" : "Clear Deny");
     });
-
-    /* perm_table.on("click", `#${id_prefix}_fullaccess_button`, function () {
-      const allowCheckboxes = perm_table.find(
-        'input.perm_checkbox[ptype="allow"]',
-      );
-
-      const allChecked =
-        allowCheckboxes.length > 0 &&
-        allowCheckboxes.filter(":checked").length === allowCheckboxes.length;
-
-      allowCheckboxes.each(function () {
-        const checkbox = $(this);
-
-        if (checkbox.prop("disabled")) return;
-
-        checkbox.prop("checked", !allChecked).trigger("change");
-      });
-
-      $(this).text(allChecked ? "Allow All" : "Clear Allow");
-    }); */
-    // END MARCUS ADDED
 
     // !!! OLD HELPER FUNCTION THAT I HAD TO CHANGE TO MANUALLY REORDER AND ADD HEADERS
   // If no subset of permissions is passed in, use all of them.
