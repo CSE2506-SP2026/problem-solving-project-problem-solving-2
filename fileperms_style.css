@@ -397,8 +397,7 @@ th[id$="_header_deny"] .custom-tooltip-text{
 }
 
 #permdialog_file_user_list .ui-widget-content.ui-selected {
-    /* background-color: #007fff !important; */
-    background-color: white !important;
+    background-color: #007fff !important;
     color: white !important;
 }
 
