@@ -21,6 +21,69 @@ perm_dialog = $(`
 `)
 $('#sidepanel').append(perm_dialog)
 
+function refreshPermissionPanelsAfterHistoryChange() {
+    let prevFilepath = perm_dialog.attr('filepath') || ''
+    let prevUsername = (typeof file_permission_users !== 'undefined' && file_permission_users.attr)
+        ? (file_permission_users.attr('selected_item') || '')
+        : ''
+
+    if(prevFilepath.length > 0) {
+        perm_dialog.attr('filepath', '')
+        perm_dialog.attr('filepath', prevFilepath)
+
+        if(prevUsername.length > 0 && typeof file_permission_users !== 'undefined') {
+            let userElem = file_permission_users.find(`.ui-selectee[name="${prevUsername}"]`)
+            if(userElem.length) {
+                file_permission_users.find('.ui-selectee').removeClass('ui-selected')
+                userElem.addClass('ui-selected')
+                file_permission_users.attr('selected_item', prevUsername)
+                grouped_permissions.attr('username', prevUsername)
+            }
+        }
+    }
+
+    if(typeof grouped_permissions !== 'undefined' && grouped_permissions.data) {
+        let refresh = grouped_permissions.data('refreshPermTable')
+        if(typeof refresh === 'function') refresh()
+    }
+
+    if($('#advdialog').length && $('#advdialog').dialog('isOpen')) {
+        let advPath = $('#advdialog').attr('filepath')
+        if(advPath && advPath in path_to_file) {
+            open_advanced_dialog(advPath)
+        }
+    }
+
+    updateRestoreInheritedAvailability()
+}
+
+function updateUndoRedoButtons() {
+    $('#perm_undo_button').prop('disabled', !can_undo_permission_history())
+    $('#perm_redo_button').prop('disabled', !can_redo_permission_history())
+}
+
+$('#perm_undo_button').on('click', function() {
+    if(undo_permission_change()) {
+        showStatus('Undid last change')
+    }
+})
+
+$('#perm_redo_button').on('click', function() {
+    if(redo_permission_change()) {
+        showStatus('Redid last change')
+    }
+})
+
+emitter.addEventListener('permissionHistoryApplied', function() {
+    refreshPermissionPanelsAfterHistoryChange()
+})
+
+emitter.addEventListener('permissionHistoryChanged', function() {
+    updateUndoRedoButtons()
+})
+
+updateUndoRedoButtons()
+
 function setSidepanelVisible(isVisible) {
     if(isVisible) {
         $('#sidepanel').removeClass('sidepanel--hidden').attr('aria-hidden', 'false')

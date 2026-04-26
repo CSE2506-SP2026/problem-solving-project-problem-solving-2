@@ -4,6 +4,124 @@
 
 emitter = new EventTarget()
 
+let permission_undo_history = []
+let permission_redo_history = []
+let permission_history_is_restoring = false
+let permission_history_last_hash = null
+
+function snapshot_permission_state() {
+  let snapshot = {
+    files: {}
+  }
+
+  let filepaths = Object.keys(path_to_file).sort()
+  for(let fp of filepaths) {
+    let file_obj = path_to_file[fp]
+    snapshot.files[fp] = {
+      owner: get_user_name(file_obj.owner),
+      using_permission_inheritance: !!file_obj.using_permission_inheritance,
+      acl: file_obj.acl.map(function(ace) {
+        return {
+          who: get_user_name(ace.who),
+          is_group: (typeof(ace.who) !== 'string'),
+          permission: ace.permission,
+          is_allow_ace: !!ace.is_allow_ace,
+        }
+      }),
+    }
+  }
+
+  return snapshot
+}
+
+function permission_snapshot_hash(snapshot) {
+  return JSON.stringify(snapshot)
+}
+
+function record_permission_history_snapshot(clear_redo = true) {
+  if(permission_history_is_restoring) return
+
+  let snapshot = snapshot_permission_state()
+  let hash = permission_snapshot_hash(snapshot)
+  if(hash === permission_history_last_hash) return
+
+  permission_undo_history.push(snapshot)
+  permission_history_last_hash = hash
+
+  if(clear_redo) {
+    permission_redo_history = []
+  }
+
+  emitter.dispatchEvent(new CustomEvent('permissionHistoryChanged'))
+}
+
+function restore_permission_snapshot(snapshot) {
+  if(!snapshot || !snapshot.files) return false
+
+  permission_history_is_restoring = true
+  try {
+    for(let fp in snapshot.files) {
+      if(!(fp in path_to_file)) continue
+
+      let file_obj = path_to_file[fp]
+      let saved_file = snapshot.files[fp]
+      let owner_name = saved_file.owner
+
+      file_obj.owner = (owner_name in all_users) ? all_users[owner_name] : owner_name
+      file_obj.using_permission_inheritance = !!saved_file.using_permission_inheritance
+      file_obj.acl = saved_file.acl.map(function(saved_ace) {
+        let who_obj = (saved_ace.who in all_users) ? all_users[saved_ace.who] : saved_ace.who
+        return make_ace(who_obj, saved_ace.permission, !!saved_ace.is_allow_ace)
+      })
+    }
+
+    permission_history_last_hash = permission_snapshot_hash(snapshot)
+    return true
+  }
+  finally {
+    permission_history_is_restoring = false
+  }
+}
+
+function can_undo_permission_history() {
+  return permission_undo_history.length > 1
+}
+
+function can_redo_permission_history() {
+  return permission_redo_history.length > 0
+}
+
+function undo_permission_change() {
+  if(!can_undo_permission_history()) return false
+
+  let current = permission_undo_history.pop()
+  permission_redo_history.push(current)
+
+  let previous = permission_undo_history[permission_undo_history.length - 1]
+  let restored = restore_permission_snapshot(previous)
+  if(!restored) return false
+
+  emitState('Undo permission change', {recordHistory: false})
+  emitter.dispatchEvent(new CustomEvent('permissionHistoryApplied', { detail: { direction: 'undo' } }))
+  emitter.dispatchEvent(new CustomEvent('permissionHistoryChanged'))
+  return true
+}
+
+function redo_permission_change() {
+  if(!can_redo_permission_history()) return false
+
+  let next = permission_redo_history.pop()
+  permission_undo_history.push(next)
+
+  let restored = restore_permission_snapshot(next)
+  if(!restored) return false
+
+  emitState('Redo permission change', {recordHistory: false})
+  emitter.dispatchEvent(new CustomEvent('permissionHistoryApplied', { detail: { direction: 'redo' } }))
+  emitter.dispatchEvent(new CustomEvent('permissionHistoryChanged'))
+  return true
+}
+
 // -- pseudo-enum of permission types -- 
 // see also "List of possible permission" table at  https://espace.cern.ch/winservices-help/NICESecurityAndAntivirus/NICESecurityHowTo/Pages/ManagingACLSettingPermssion.aspx 
 permissions = {
@@ -205,7 +323,11 @@ function get_allowed_actions_string(){
   return allowedActions
 }
 
-function emitState(purpose = "Permission state changed"){
+function emitState(purpose = "Permission state changed", {recordHistory = true} = {}){
+  if(recordHistory) {
+    record_permission_history_snapshot(true)
+  }
+
   let allowedActions = get_allowed_actions_string()
 
   let data = new SpecialEventEntry(ActionEnum.SPECIAL_EVENT, new Date().getTime(), {
