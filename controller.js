@@ -404,10 +404,17 @@ function convert_parent_permissions(file_obj) {
 
 function replace_child_perm_with_inherited(file_obj) {
     let filepath = get_full_path(file_obj);
-    for (c of parent_to_children[filepath]) {
+
+    if (!(filepath in parent_to_children)) return;
+
+    for (const c of parent_to_children[filepath]) {
         c.using_permission_inheritance = true;
+
         c.acl = [];
     }
+
+    recompute_file_structure(files);
+
     emitState();
 }
 
